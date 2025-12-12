@@ -1,1 +1,2 @@
 git+https://github.com/stanislawbartkowski/ksef_pyth.git
+pyyaml
