@@ -1,3 +1,4 @@
 tokens:
-  env: testx
-  NIP999999999: xxxxxxxxxxxx
+  NIP9999999997: 
+    token: xxxxxxxxxxxx
+    env: testx

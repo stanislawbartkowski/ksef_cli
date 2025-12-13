@@ -1,19 +1,21 @@
 import os
 
-from ksef_cli.ksef_conf import CONF
 from ksef_cli.ksef_tokens import odczytaj_tokny
+from ksef_cli.ksef_conf import CONF
 
-from tests.helper import set_os
+from tests.helper import CO
 
 
 def test1():
-    path = CONF.get_ksef_conf_path()
+    C = CONF.from_os_env()
+    path = C._ksef_conf_path
     print(f"KSEF Config Path: {path}")
 
 
 def test2():
-    set_os()
-    token = odczytaj_tokny("1234567890")
+    C = CO()
+    token = odczytaj_tokny(C, "1234567890")
+
 
 # test1()
 test2()
