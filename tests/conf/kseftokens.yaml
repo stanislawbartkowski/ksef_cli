@@ -2,3 +2,8 @@ tokens:
   NIP9999999997: 
     token: xxxxxxxxxxxx
     env: testx
+
+  NIP888888887: 
+    token: xxxxxxxxxxxx
+    env: test
+

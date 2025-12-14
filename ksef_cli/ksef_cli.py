@@ -4,6 +4,7 @@ import shutil
 from .ksef_conf import CONF
 
 
+
 class KSEFCLI:
 
     @classmethod
@@ -15,11 +16,8 @@ class KSEFCLI:
         self._C = C
         self._nip = nip
 
-    def clean_work(self) -> None:
-        work_dir = os.path.join("work", self._nip)
-
+    def clean_nip_dir(self) -> None:
+        work_dir = self._C.get_ksef_work_dir(self._nip)
         if os.path.exists(work_dir):
             shutil.rmtree(work_dir)
-            print(f"Cleaned working directory for NIP: {nip}")
-        else:
-            print(f"No working directory found for NIP: {nip}")
+        
