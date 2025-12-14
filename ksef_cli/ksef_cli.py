@@ -1,11 +1,11 @@
 import os
 import shutil
 
+from .ksef_log import LOGGER, E
 from .ksef_conf import CONF
 
 
-
-class KSEFCLI:
+class KSEFCLI(LOGGER):
 
     @classmethod
     def from_os_env(cls, nip: str):
@@ -13,11 +13,13 @@ class KSEFCLI:
         return cls(C, nip)
 
     def __init__(self, C: CONF, nip: str) -> None:
-        self._C = C
-        self._nip = nip
+        super(KSEFCLI, self).__init__(C, nip)
 
     def clean_nip_dir(self) -> None:
-        work_dir = self._C.get_ksef_work_dir(self._nip)
+        EV = self.genE(E.WYCZYSC_DANE)
+        work_dir = self.C.work_nip_dir(self.nip)
+        msg = f"Usunięto katalog roboczy dla NIP {self.nip}: {work_dir}"
+        self.logger.info(msg)
         if os.path.exists(work_dir):
             shutil.rmtree(work_dir)
-        
+        EV.koniec(res=True)

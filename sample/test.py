@@ -1,9 +1,14 @@
-import os
+import logging
 
 from ksef_cli.ksef_tokens import odczytaj_tokny
 from ksef_cli.ksef_conf import CONF
 from ksef_cli import KSEFCLI
+
 from tests.helper import CO
+
+
+def wez_logger():
+    return logging.getLogger(__name__)
 
 
 def test1():
@@ -19,7 +24,10 @@ def test2():
 
 def test3():
     C = CO()
-    cli = KSEFCLI(C, "1234567890")
+    nip = "1234567890"
+    C = CO()
+    cli = KSEFCLI(C, nip)
+    cli.logger.info("KSEFCLI initialized successfully.")
     cli.clean_nip_dir()
 
 

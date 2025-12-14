@@ -1,7 +1,5 @@
 import os
 
-from .ksef_log import def_logger
-
 
 class CONF:
 
@@ -11,7 +9,6 @@ class CONF:
     def __init__(self, ksef_conf_path: str, ksef_work_path: str):
         self._ksef_conf_path = ksef_conf_path
         self._ksef_work_path = ksef_work_path
-        def_logger()
 
     @property
     def ksef_conf_path(self) -> str:
@@ -41,3 +38,15 @@ class CONF:
         if not os.path.exists(path):
             os.makedirs(path)
         return path
+
+    def get_nip_log_file(self, nip: str) -> str:
+        return os.path.join(self.work_nip_dir(nip), "ksef.log")
+
+    def get_log_file(self) -> str:
+        return os.path.join(self._ksef_work_path, "ksef.log")
+
+    def get_nip_events_file(self, nip: str) -> str:
+        return os.path.join(self.work_nip_dir(nip), "events.csv")
+
+    def get_events_file(self) -> str:
+        return os.path.join(self._ksef_work_path, "events.csv")

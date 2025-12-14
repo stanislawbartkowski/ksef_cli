@@ -1,5 +1,6 @@
 import unittest
 
+from ksef_cli import KSEFCLI
 from ksef_cli.ksef_tokens import odczytaj_tokny
 
 from helper import CO
@@ -27,3 +28,8 @@ class TestKSEFCLI(unittest.TestCase):
         print(token)
         self.assertEqual(token.env, 0)
         self.assertEqual(token.token, 'xxxxxxxxxxxx')
+
+    def test_usun_katalog_roboczy(self):
+        nip = "777777776"
+        cli = KSEFCLI(self.C, nip)
+        cli.clean_nip_dir()
