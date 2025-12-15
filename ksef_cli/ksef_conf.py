@@ -50,3 +50,7 @@ class CONF:
 
     def get_events_file(self) -> str:
         return os.path.join(self._ksef_work_path, "events.csv")
+
+    def get_invoice_upo(self, nip: str, ksef_numer: str) -> str:
+        kdir = self._get_work_subdirectory(nip,  ksef_numer)
+        return os.path.join(kdir, "upo.xml")

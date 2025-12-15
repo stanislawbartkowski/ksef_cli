@@ -7,3 +7,12 @@ tokens:
     token: xxxxxxxxxxxx
     env: test
 
+  NIP7497725064:
+    token: 20251116-EC-0317C65000-2CA83C40D9-73|nip-7497725064|80be6cfced7f44eb860aeeb644e8cffdd59bbad9e218415296db90a39e6e5370
+    env: test
+
+  NIP7952809480:
+    token: 20251210-EC-49CD637000-C47EF8923C-D7|nip-7952809480|4dfe5e94a46a49f1846747dd3891e60a2912a922e90640eaaf44a64eee3971d5
+    env: test
+
+  

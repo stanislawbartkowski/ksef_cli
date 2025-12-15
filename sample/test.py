@@ -4,7 +4,7 @@ from ksef_cli.ksef_tokens import odczytaj_tokny
 from ksef_cli.ksef_conf import CONF
 from ksef_cli import KSEFCLI
 
-from tests.helper import CO
+import tests.helper as T
 
 
 def wez_logger():
@@ -18,19 +18,55 @@ def test1():
 
 
 def test2():
-    C = CO()
+    C = T.CO()
     odczytaj_tokny(C, "1234567890")
 
 
 def test3():
-    C = CO()
     nip = "1234567890"
-    C = CO()
+    C = T.CO()
     cli = KSEFCLI(C, nip)
     cli.logger.info("KSEFCLI initialized successfully.")
     cli.clean_nip_dir()
 
 
+def test4():
+    C = T.CO()
+    nip = "1234567890"
+    cli = KSEFCLI(C, nip)
+    output = T.temp_ojosn()
+    res = cli.czytaj_faktury_zakupowe(
+        output, "2023-01-01", "2023-12-31")
+    print(res)
+
+
+def test5():
+    C = T.CO()
+    nip = T.NIP
+    fa = T.NIEPOPRAWNA_FAKTURA
+    invoice_path = T.testdatadir(fa)
+    cli = KSEFCLI(C, nip)
+    output = T.temp_ojosn()
+    res = cli.wyslij_fakture_do_ksef(
+        res_pathname=output, invoice_path=invoice_path)
+    print(res)
+
+
+def test6():
+    C = T.CO()
+    nip = T.NIP
+    fa = T.FAKTURA_WZORZEC
+    invoice_path = T.prepare_invoice(fa)
+    cli = KSEFCLI(C, nip)
+    output = T.temp_ojosn()
+    res = cli.wyslij_fakture_do_ksef(
+        res_pathname=output, invoice_path=invoice_path)
+    print(res)
+
+
 # test1()
 # test2()
-test3()
+# test3()
+# test4()
+# test5()
+test6()

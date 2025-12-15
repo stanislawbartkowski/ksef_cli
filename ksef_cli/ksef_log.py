@@ -2,6 +2,7 @@ import logging
 import time
 from datetime import datetime
 import csv
+import json
 
 from .ksef_conf import CONF
 
@@ -37,35 +38,53 @@ class _A:
 class E(_A):
 
     WYCZYSC_DANE = 0
+    CZYTANIE_FAKTUR_ZAKUPOWYCH = 1
+    WYSLIJ_FAKTURE = 2
 
     _d = {
-        WYCZYSC_DANE: "Wyczyść dane robocze"
+        WYCZYSC_DANE: "Wyczyść dane robocze",
+        CZYTANIE_FAKTUR_ZAKUPOWYCH: "Czytanie faktur zakupowych",
+        WYSLIJ_FAKTURE: "Wyślij fakture do KSeF"
     }
 
-    def __init__(self, C: CONF, nip: str, action: int):
+    def __init__(self, C: CONF, nip: str, action: int, output: str | None):
         super(E, self).__init__(C, nip)
         self._action = action
         self._start_time = time.time()
+        self._output = output
 
-    def koniec(self, res):
+    def koniec(self, res: bool, errmess: str, res_dict=None):
+        res_dict = res_dict or {}
         end_time = time.time()
         elapsed = end_time - self._start_time
         info = {
             "start_time": _toiso_str(self._start_time),
             "end_time": _toiso_str(end_time),
             "elapsed_seconds": f"{elapsed:.2f}",
+            "a": self._action,
             "action:": self._d.get(self._action, "Nieznana akcja"),
             "result": "OK" if res else "FAIL",
-            "nip": self.nip
+            "errmess": "" if res else errmess,
+            "nip": self.nip,
+            "addinfo": errmess if res else ""
         }
         list = ["start_time", "end_time", "elapsed_seconds",
-                "action:", "result", "nip"]
+                "a", "action:", "result", "errmess", "nip", "addinfo"]
         for f in self.C.get_events_file(), self.C.get_nip_events_file(self.nip):
             with open(f, 'a', newline='', encoding='utf-8') as f:
                 writer = csv.DictWriter(f, fieldnames=list)
                 if f.tell() == 0:
                     writer.writeheader()
                 writer.writerow(info)
+        if self._output is not None:
+            # zapisz output
+            res_output = {
+                "OK": res,
+                "errmess": errmess,
+            }
+            res_output.update(res_dict)
+            with open(self._output, "w") as f:
+                json.dump(res_output, f)
 
 
 class LOGGER(_A):
@@ -75,8 +94,8 @@ class LOGGER(_A):
         _def_logger(C, nip)
         self._logger = logging.getLogger(__name__)
 
-    def genE(self, action: int) -> E:
-        return E(self.C, self.nip, action)
+    def genE(self, action: int, output: str | None) -> E:
+        return E(self.C, nip=self.nip, action=action, output=output)
 
     @property
     def logger(self):
