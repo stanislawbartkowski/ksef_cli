@@ -1,11 +1,12 @@
 import os
 import shutil
+import tempfile
 from typing import Callable
+from requests import HTTPError
 
 import xml.etree.ElementTree as et
 
 from ksef import KSEFSDK
-from requests import HTTPError
 
 from .ksef_log import LOGGER, E
 from .ksef_conf import CONF
@@ -13,6 +14,39 @@ from .ksef_tokens import odczytaj_tokny
 
 
 class KSEFCLI(LOGGER):
+
+    @staticmethod
+    def ksef_action(action: int):
+        def ksef_action_decorator(func: Callable):
+            def wrapper(self, output: str, **kwargs):
+                EV = self.genE(action, output=output)
+                try:
+                    token = odczytaj_tokny(self.C, self.nip)
+                except Exception as e:
+                    errmess = f"Nie można odczytać tokena KSeF dla NIP {self.nip}"
+                    EV.koniec(res=False, errmess=errmess)
+                    self.logger.error(errmess)
+                    self.logger.exception(e)
+                    return False, errmess
+                try:
+                    K = KSEFSDK.initsdk(
+                        env=token.env, nip=token.nip, token=token.token)
+                    res_dict, mess = func(self, K, **kwargs)
+                    K.session_terminate()
+                    EV.koniec(res=True, errmess=mess, res_dict=res_dict)
+                    return True, ""
+                except HTTPError as e:
+                    EV.koniec(res=False, errmess=str(e))
+                    self.logger.exception(e)
+                    response = e.response.text
+                    self.logger.error(response)
+                    return False, str(e)
+                except Exception as e:
+                    EV.koniec(res=False, errmess=str(e))
+                    self.logger.exception(e)
+                    return False, str(e)
+            return wrapper
+        return ksef_action_decorator
 
     @classmethod
     def from_os_env(cls, nip: str):
@@ -31,51 +65,16 @@ class KSEFCLI(LOGGER):
             shutil.rmtree(work_dir)
         EV.koniec(res=True, errmess="")
 
-    def _do_action(self, action: int, output: str, run_func: Callable, **kwargs) -> tuple[bool, str]:
-        EV = self.genE(action, output=output)
-        try:
-            token = odczytaj_tokny(self.C, self.nip)
-        except Exception as e:
-            errmess = f"Nie można odczytać tokena KSeF dla NIP {self.nip}"
-            EV.koniec(res=False, errmess=errmess)
-            self.logger.error(errmess)
-            self.logger.exception(e)
-            return False, errmess
-        try:
-            K = KSEFSDK.initsdk(
-                env=token.env, nip=token.nip, token=token.token)
-            res_dict, mess = run_func(K, **kwargs)
-            K.session_terminate()
-            EV.koniec(res=True, errmess=mess, res_dict=res_dict)
-            return True, ""
-        except HTTPError as e:
-            EV.koniec(res=False, errmess=str(e))
-            self.logger.exception(e)
-            response = e.response.text
-            self.logger.error(response)
-            return False, str(e)
-        except Exception as e:
-            EV.koniec(res=False, errmess=str(e))
-            self.logger.exception(e)
-            return False, str(e)
-
-    def _czytaj_faktury_zakupe_action(self, K: KSEFSDK, data_od: str, data_do: str) -> tuple[dict, str]:
+    @ksef_action(action=E.CZYTANIE_FAKTUR_ZAKUPOWYCH)
+    def czytaj_faktury_zakupowe(self, K: KSEFSDK, data_od: str, data_do: str) -> tuple[dict, str]:
         faktury_zakupowe = K.get_invoices_zakupowe_metadata(
             date_from=data_od, date_to=data_do)
         return {
             "faktury": faktury_zakupowe
         }, f"{data_od} - {data_do}"
 
-    def czytaj_faktury_zakupowe(self, res_pathname: str, data_od: str, data_do: str) -> tuple[bool, str]:
-        return self._do_action(
-            action=E.CZYTANIE_FAKTUR_ZAKUPOWYCH,
-            output=res_pathname,
-            run_func=self._czytaj_faktury_zakupe_action,
-            data_od=data_od,
-            data_do=data_do
-        )
-
-    def _wyslij_fakture_do_ksef_action(self, K: KSEFSDK, invoice_path: str) -> tuple[dict, str]:
+    @ksef_action(action=E.WYSLIJ_FAKTURE)
+    def wyslij_fakture_do_ksef(self, K: KSEFSDK, invoice_path: str) -> tuple[dict, str]:
         with open(invoice_path, mode="r") as f:
             invoice_xml = f.read()
         K.start_session()
@@ -94,14 +93,6 @@ class KSEFCLI(LOGGER):
         return {
             "numer_ksef": numer_ksef
         }, numer_ksef
-
-    def wyslij_fakture_do_ksef(self, res_pathname: str, invoice_path: str) -> tuple[bool, str]:
-        return self._do_action(
-            action=E.WYSLIJ_FAKTURE,
-            output=res_pathname,
-            run_func=self._wyslij_fakture_do_ksef_action,
-            invoice_path=invoice_path
-        )
 
     def wez_upo(self, res_pathname: str, ksef_number: str) -> tuple[bool, str]:
         EV = self.genE(E.WEZ_UPO, output=res_pathname)
@@ -124,3 +115,12 @@ class KSEFCLI(LOGGER):
             return True, ""
         EV.koniec(False, errmess)
         return False, ""
+
+    @ksef_action(action=E.WEZ_FAKTURE)
+    def wez_fakture(self, K: KSEFSDK, ksef_number: str) -> tuple[dict, str]:
+        invoice = K.get_invoice(ksef_number=ksef_number)
+        with tempfile.NamedTemporaryFile(delete_on_close=False, delete=False) as t:
+            t.write(invoice.encode())
+            return {
+                "invoice": t.name
+            }, ""

@@ -61,7 +61,7 @@ class TestKSEFCLI(unittest.TestCase):
         nip = "xxxxxxxxxxxx"
         cli = KSEFCLI(self.C, nip)
         res, msg = cli.czytaj_faktury_zakupowe(
-            "xxxxxx", "2023-01-01", "2023-12-31")
+            output="xxxxxx", data_od="2023-01-01", data_do="2023-12-31")
         self.assertFalse(res)
         print(msg)
         self.assertIn("Nie można odczytać tokena KSeF dla NIP", msg)
@@ -70,7 +70,7 @@ class TestKSEFCLI(unittest.TestCase):
         nip = "888888887"
         cli = KSEFCLI(self.C, nip)
         res, msg = cli.czytaj_faktury_zakupowe(
-            "xxxxxx", "2023-01-01", "2023-12-31")
+            output="xxxxxx", data_od="2023-01-01", data_do="2023-12-31")
         self.assertFalse(res)
         print(msg)
 
@@ -81,7 +81,7 @@ class TestKSEFCLI(unittest.TestCase):
         cli = KSEFCLI(self.C, nip)
         output = T.temp_ojosn()
         res = cli.wyslij_fakture_do_ksef(
-            res_pathname=output, invoice_path=invoice_path)
+            output=output, invoice_path=invoice_path)
         print(res)
         self.assertFalse(res[0])
         self.assertIn("Błąd", res[1])
@@ -99,7 +99,7 @@ class TestKSEFCLI(unittest.TestCase):
         cli = KSEFCLI(self.C, nip)
         output = T.temp_ojosn()
         res = cli.wyslij_fakture_do_ksef(
-            res_pathname=output, invoice_path=invoice_path)
+            output=output, invoice_path=invoice_path)
         print(res)
         self.assertTrue(res[0])
         with open(output, "r") as f:
@@ -151,7 +151,7 @@ class TestKSEFCLI(unittest.TestCase):
         cli = KSEFCLI(self.C, nip)
         output = T.temp_ojosn()
         res = cli.wyslij_fakture_do_ksef(
-            res_pathname=output, invoice_path=invoice_path)
+            output=output, invoice_path=invoice_path)
         print(res)
         # tutaj jest błąd, gdy próba wystawienia faktury w cudzym imieniu
         self.assertFalse(res[0])
@@ -168,7 +168,7 @@ class TestKSEFCLI(unittest.TestCase):
         cli = KSEFCLI(self.C, nip)
         output = T.temp_ojosn()
         res = cli.wyslij_fakture_do_ksef(
-            res_pathname=output, invoice_path=invoice_path)
+            output=output, invoice_path=invoice_path)
         print(res)
         # tutaj jest błąd, gdy próba wystawienia faktury w cudzym imieniu
         self.assertTrue(res[0])
@@ -183,7 +183,7 @@ class TestKSEFCLI(unittest.TestCase):
         cli = KSEFCLI(self.C, nip)
         output = T.temp_ojosn()
         res = cli.czytaj_faktury_zakupowe(
-            res_pathname=output, data_od=d_from, data_do=d_to)
+            output=output, data_od=d_from, data_do=d_to)
         print(res)
         self.assertTrue(res[0])
         # sprawdz wynik
@@ -195,6 +195,14 @@ class TestKSEFCLI(unittest.TestCase):
         invoice_meta = faktury[-1]
         ksef_number = invoice_meta["ksefNumber"]
         print(ksef_number)
-
-
-
+        res = cli.wez_fakture(output=output, ksef_number=ksef_number)
+        print(res)
+        d = self._wez_res(output)
+        print(d)
+        self.assertTrue(d["OK"])
+        # odczytaj invoice
+        invoice = d['invoice']
+        with open(invoice, mode="r") as f:
+            invoice_xml = f.read()
+            print(invoice_xml)
+            et.fromstring(invoice_xml)

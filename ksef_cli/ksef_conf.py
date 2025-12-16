@@ -54,3 +54,7 @@ class CONF:
     def get_invoice_upo(self, nip: str, ksef_numer: str) -> str:
         kdir = self._get_work_subdirectory(nip,  ksef_numer)
         return os.path.join(kdir, "upo.xml")
+
+    def get_invoice_faktura(self, nip: str, ksef_numer: str) -> str:
+        kdir = self._get_work_subdirectory(nip,  ksef_numer)
+        return os.path.join(kdir, "faktura.xml")
