@@ -12,9 +12,26 @@ import helper as T
 
 class TestKSEFCLI(unittest.TestCase):
 
+    # -------------
+    # helpers
+    # -------------
+
+    @staticmethod
+    def _wez_res(output: str) -> dict:
+        with open(output, "r") as f:
+            d = json.load(fp=f)
+        return d
+
+    # -------------
+    # test fixture
+    # -------------
     @classmethod
     def setUpClass(cls):
         cls.C = T.CO()
+
+    # ------------
+    # test suite
+    # ------------
 
     def test_token_nip_no(self):
         # Test with a non existing NIP number
@@ -89,8 +106,36 @@ class TestKSEFCLI(unittest.TestCase):
         self.assertTrue(d["OK"])
         f_ksef = d["numer_ksef"]
         print(f_ksef)
-        # sprawsz, czy odczytane upo
+        # sprawdz, czy odczytane upo
         upo = self.C.get_invoice_upo(nip, f_ksef)
         with open(upo, "r") as f:
             upo_xml = f.read()
             et.fromstring(upo_xml)
+        return cli, f_ksef
+
+    def test_wez_upo_nie_istnieje(self):
+        nip = "aaaaaaaaaa"
+        cli = KSEFCLI(self.C, nip)
+        output = T.temp_ojosn()
+        res = cli.wez_upo(res_pathname=output, ksef_number="bbbbbbb")
+        print(res)
+        self.assertFalse(res[0])
+        d = self._wez_res(output)
+        print(d)
+        self.assertFalse(d["OK"])
+
+    def test_wez_upo_dla_faktury(self):
+        cli, f_ksef = self.test_wyslij_fakture_sprzedazy()
+        # teraz wez upo
+        output = T.temp_ojosn()
+        res = cli.wez_upo(res_pathname=output, ksef_number=f_ksef)
+        print(res)
+        self.assertTrue(res[0])
+        d = self._wez_res(output)
+        print(d)
+        self.assertTrue(d["OK"])
+        # teraz sprawdz upo
+        upo = d["upo"]
+        # sprobuj odczytac
+        with open(upo, "r") as f:
+            _ = f.read()

@@ -1,10 +1,10 @@
 import os
 import shutil
-import json
 from typing import Callable
 
+import xml.etree.ElementTree as et
+
 from ksef import KSEFSDK
-from requests import HTTPError
 
 from .ksef_log import LOGGER, E
 from .ksef_conf import CONF
@@ -104,4 +104,23 @@ class KSEFCLI(LOGGER):
         )
 
     def wez_upo(self, res_pathname: str, ksef_number: str) -> tuple[bool, str]:
-        pass
+        EV = self.genE(E.WEZ_UPO, output=res_pathname)
+        upo_file = self.C.get_invoice_upo(self._nip, ksef_numer=ksef_number)
+        errmess = None
+        if not os.path.exists(upo_file):
+            errmess = f'Plik {upo_file} nie istnieje'
+        else:
+            with open(upo_file, mode="r") as f:
+                upo_xml = f.read()
+                try:
+                    et.fromstring(upo_xml)
+                except Exception:
+                    errmess = f"Plik {upo_file} nie jest poprawnym plikiem XML"
+        if errmess is None:
+            res = {
+                "upo": upo_file
+            }
+            EV.koniec(True, upo_file, res_dict=res)
+            return True, ""
+        EV.koniec(False, errmess)
+        return False, ""
