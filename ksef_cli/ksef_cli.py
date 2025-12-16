@@ -71,7 +71,6 @@ class KSEFCLI(LOGGER):
             action=E.CZYTANIE_FAKTUR_ZAKUPOWYCH,
             output=res_pathname,
             run_func=self._czytaj_faktury_zakupe_action,
-            res_pathname=res_pathname,
             data_od=data_od,
             data_do=data_do
         )

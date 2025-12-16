@@ -1,3 +1,5 @@
+import datetime
+
 import json
 
 import unittest
@@ -139,3 +141,60 @@ class TestKSEFCLI(unittest.TestCase):
         # sprobuj odczytac
         with open(upo, "r") as f:
             _ = f.read()
+
+    def test_faktura_zakupowa_blad(self):
+        nip = T.NIP
+        fa = T.FAKTURA_ZAKUP
+        # faktura, z zamienionym nipem nabywcy i sprzedawcy
+        # NIP - nabywca, NIP_NABYWCA - sprzedawca
+        invoice_path = T.prepare_invoice(fa)
+        cli = KSEFCLI(self.C, nip)
+        output = T.temp_ojosn()
+        res = cli.wyslij_fakture_do_ksef(
+            res_pathname=output, invoice_path=invoice_path)
+        print(res)
+        # tutaj jest błąd, gdy próba wystawienia faktury w cudzym imieniu
+        self.assertFalse(res[0])
+        errmess = res[1]
+        self.assertIn(
+            "nie jest uprawniony do wystawienia faktury w imieniu", errmess)
+
+    def test_faktura_zakupowa(self):
+        nip = T.NIP_NABYWCA
+        fa = T.FAKTURA_ZAKUP
+        # faktura, z zamienionym nipem nabywcy i sprzedawcy
+        # NIP - nabywca, NIP_NABYWCA - sprzedawca
+        invoice_path = T.prepare_invoice(fa)
+        cli = KSEFCLI(self.C, nip)
+        output = T.temp_ojosn()
+        res = cli.wyslij_fakture_do_ksef(
+            res_pathname=output, invoice_path=invoice_path)
+        print(res)
+        # tutaj jest błąd, gdy próba wystawienia faktury w cudzym imieniu
+        self.assertTrue(res[0])
+
+    def test_pobierz_faktury_zakupowe(self):
+        d2 = datetime.datetime.now() + datetime.timedelta(days=2)
+        d1 = d2 - datetime.timedelta(days=7)
+        d_from = d1.strftime("%Y-%m-%d")
+        d_to = d2.strftime("%Y-%m-%d")
+        print(d_from, d_to)
+        nip = T.NIP
+        cli = KSEFCLI(self.C, nip)
+        output = T.temp_ojosn()
+        res = cli.czytaj_faktury_zakupowe(
+            res_pathname=output, data_od=d_from, data_do=d_to)
+        print(res)
+        self.assertTrue(res[0])
+        # sprawdz wynik
+        d = self._wez_res(output)
+        print(d)
+        self.assertTrue(d["OK"])
+        faktury = d["faktury"]
+        # wez ostatnią
+        invoice_meta = faktury[-1]
+        ksef_number = invoice_meta["ksefNumber"]
+        print(ksef_number)
+
+
+

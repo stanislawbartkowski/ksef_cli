@@ -11,6 +11,7 @@ NIP_NABYWCA = "7952809480"
 
 NIEPOPRAWNA_FAKTURA = "FA_3_Przykład_9_niepoprawna.xml"
 FAKTURA_WZORZEC = "FA_3_Przykład_9_pattern.xml"
+FAKTURA_ZAKUP = "FA_3_Przykład_8_zakup.xml"
 
 
 def _workdir() -> str:
