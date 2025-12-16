@@ -1,0 +1,53 @@
+Wywołanie:
+  python -m ksef_cli <akcja> <nip> <plik_na_wynik> <dodatkowe_parametry>
+
+Akcje:
+  wyslij_fakture Wysłanie faktury do system KSeF 2.0
+  odczytaj_upo Odczytaj plik UPO do wysłanej i zaakceptowanej faktury
+  pobierz_zakupowe Odczytaj nagłówki (metadata) faktur zakupowych
+  odczytaj_fakture Odczytaj fakturę na podstawie nadanego numeru KSeF
+
+Nip:
+  Numer NIP użytkownika KSeF 2.0. NIP musi mieć odpowiednik z pliku konfiguracyjnym
+
+Plik_na_wynik:
+  Plik gdzie będzie zapisany wynik operacji. Jest to plik formacie JSON, który zawiera dla każdej operacji dwie informacje oraz informacje specyficzne dla akcji
+    OK: true/fals Akcja zakończona sukcesem lub niepowodzeniem
+    errmess: Jeśli akcja zakończona niepowodzeniem, to informacja o błędzie
+
+wyslij_fakture
+  python -m ksef_cli wyslij_fakture <nip> <plik_na_wynik> <plik XML z fakturą do wysłania>
+
+  Zwraca w plik_na_wynik
+    OK: true/false
+    errmess
+    numer_ksef: Jeśli faktura została zaakceptowana, to zawiera nadany przez KSeF 2.0 numer faktury
+
+odczytaj_upo
+  python -m ksef_cli odczytaj_upo  <nip> <plik_na_wynik> <numer_ksef>
+
+  Zwraca w plik_na_wynik
+    OK: true/false
+    errmess
+    upo: plik z UPO w formacie XML
+
+odczytaj_fakture
+  python -m ksef_cli odczytaj_fakture  <nip> <plik_na_wynik> <numer_ksef>
+
+  Zwraca w plik_na_wynik
+    OK: true/false
+    errmess
+    invoice: plik z odczytaną fakturą w formacie XML
+
+pobierz_zakupowe
+  python -m ksef_cli pobierz_zakupoe  <nip> <plik_na_wynik> <data_od> <data_do>
+
+  data_od: Początkowa data faktur do oczytania w format YYYY-MM-DD
+  data_do: Data końcowa przedziału dat
+
+  Zwraca w plik_na_wynik
+    OK: true/false
+    errmess
+    faktury: plik w formacie JSON z listą odczytanych nagłówków faktur zakupowych
+
+
