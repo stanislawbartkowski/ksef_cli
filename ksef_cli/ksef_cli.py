@@ -5,6 +5,7 @@ from typing import Callable
 import xml.etree.ElementTree as et
 
 from ksef import KSEFSDK
+from requests import HTTPError
 
 from .ksef_log import LOGGER, E
 from .ksef_conf import CONF
