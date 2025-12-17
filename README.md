@@ -74,4 +74,80 @@ Przykładowy fragment pliku events.csv
 ```
 ## Operacje
 
+Wywołanie:
+
+> python -m ksef_cli <akcja> <nip> <plik_na_wynik> <dodatkowe_parametry>
+
+akcja:
+* wyslij_fakture Wysłanie faktury do system KSeF 2.0
+* odczytaj_upo Odczytaj plik UPO do wysłanej i zaakceptowanej faktury
+* pobierz_zakupowe Odczytaj nagłówki (metadata) faktur zakupowych
+* odczytaj_fakture Odczytaj fakturę na podstawie nadanego numeru KSeF
+
+nip:
+* Numer NIP użytkownika KSeF 2.0. Numer NIP musi być zawarty w plik *KSEFCONF*
+
+plik_na_wynik:
+* Nazwa pliku gdzie będzie zapisany wynik akcji. Wynik jest zapisany w formacie JSON.
+
+Plik zawiera zawsze dwa pola oraz dodatkowe pola zależne od akcji
+* OK: true/false Akcja zakońćzona sukcesem lub niepowodzeniem
+* errmess: Jeśli akcja zakończona niepowodzeniem, to informacja o błędzie
+
+Działanie:
+* Odczytuje NIP oraz wyszukuje NIP w pliku *KSEFCONF*
+* Wykonuje akcję na podstawie podanych patametrów
+* Uzupełnia dziennik oraz logging w katalogu *KSEFDIR*
+* Zapisuje plik *plik_na_wynik* w formacie JSON z wynikiem akcji
+
+Dodatkowa uwaga:
+Wywołanie nie zwraca znaczącego *exit code*. Wynik akcji, także niepowodzenie, trzeba odczytać z pliku *plik_na_wynik*
+
+## wyslij_faktura
+
+[link](https://github.com/stanislawbartkowski/ksef_pyth?tab=readme-ov-file#wys%C5%82anie-faktury)
+
+> python -m ksef_cli wyslij_fakture <nip> <plik_na_wynik> <plik XML z fakturą do wysłania>
+
+Zwracana wartość w pliku *plik_na_wynik*
+* OK
+* errmess
+* numer_ksef Jeśli faktura jest zaakceptowana w systemie KSeF 2.0, to nadany przez KSeF numer
+
+## odczytaj_upo
+
+[link](https://github.com/stanislawbartkowski/ksef_pyth?tab=readme-ov-file#odczytanie-upo)
+
+> python -m ksef_cli odczytaj_upo  <nip> <plik_na_wynik> <numer_ksef>
+
+Zwracana wartość w pliku *plik_na_wynik*
+* OK
+* errmess
+* upo Nazwa pliku zawierającego UPO w formacie XML
+
+UWAGA: UPO jest odczytywane bezpośrednio po wysłaniu faktury *wyslij_fakture* i zapamiętane w katalogu *KSEFDIR*/nip/numer_ksef. Wywołanie *odczytaj_upo* zwraca link do tego pliku, nie jest uruchamiana komunikacja z KSeF.
+
+## odczytaj_fakture
+
+[link](https://github.com/stanislawbartkowski/ksef_pyth?tab=readme-ov-file#odczytanie-faktury-wed%C5%82ug-numeru-ksef)
+
+> python -m ksef_cli odczytaj_fakture  <nip> <plik_na_wynik> <numer_ksef>
+
+Zwracana wartość w pliku *plik_na_wynik*
+* OK
+* errmess
+* invoice Nazwa plik z odczytaną fakturą w formacie XML
+
+## pobierz_zakupowe
+
+[link](https://github.com/stanislawbartkowski/ksef_pyth?tab=readme-ov-file#odczytanie-nag%C5%82%C3%B3wk%C3%B3w-faktur-zakupowych-na-podstawie-dat)
+
+> python -m ksef_cli pobierz_zakupoe  <nip> <plik_na_wynik> <data_od> <data_do>
+
+Odczytuje faktury zakupowe w przedziale dat. Daty muszą być w formacie YYYY-MM-DD
+
+Zwracana wartość w pliku *plik_na_wynik*
+* OK
+* errmess
+* faktury Lista zawierająca odczytane nagłówki faktur zakupowych z podanego zakresu dat.
 
