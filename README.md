@@ -151,3 +151,8 @@ Zwracana wartość w pliku *plik_na_wynik*
 * errmess
 * faktury Lista zawierająca odczytane nagłówki faktur zakupowych z podanego zakresu dat.
 
+## Dev environment, happy coding
+> source .venv/bin/activate
+> git clone https://github.com/stanislawbartkowski/ksef_cli.git
+> pip install -r requirements.txt
+> code .
