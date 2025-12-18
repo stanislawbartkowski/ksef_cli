@@ -10,6 +10,11 @@ class CONF:
         self._ksef_conf_path = ksef_conf_path
         self._ksef_work_path = ksef_work_path
 
+    @staticmethod
+    def test_ustaw_os_env(ksef_conf: str, ksef_dir: str):
+        os.environ[CONF._KSEFCONF_ENV] = ksef_conf
+        os.environ[CONF._KSEFDIR_ENV] = ksef_dir
+
     @property
     def ksef_conf_path(self) -> str:
         return self._ksef_conf_path

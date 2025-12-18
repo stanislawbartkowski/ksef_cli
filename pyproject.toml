@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.package-dir]
+"ksef_cli" = "ksef_cli"
+
+[project]
+name = "ksef2.0_cli"
+version = "0.0.1"
+requires-python = ">=3.11"
+authors = [
+  {name = "Stanisław Bartkowski", email = "stanislawbartkowski@gmail.com"},
+]
+dependencies = [
+  "ksef2.0_python @ git+https://github.com/stanislawbartkowski/ksef_pyth.git"
+]
+readme = "README.md"

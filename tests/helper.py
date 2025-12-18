@@ -18,10 +18,20 @@ def _workdir() -> str:
     return os.path.join(os.path.dirname(__file__), 'worktemp')
 
 
-def CO():
+def _daj_dir() -> tuple[str, str]:
     conf_path = os.path.join(os.path.dirname(
         __file__), 'conf', "kseftokens.yaml")
-    return CONF(conf_path, _workdir())
+    return conf_path, _workdir()
+
+
+def CO():
+    conf_path, work_dir = _daj_dir()
+    return CONF(conf_path, work_dir)
+
+
+def ustaw_E():
+    conf_path, work_dir = _daj_dir()
+    CONF.test_ustaw_os_env(conf_path, work_dir)
 
 
 def _temp_dir(f: str) -> str:

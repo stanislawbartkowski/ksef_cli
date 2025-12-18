@@ -27,11 +27,11 @@ def printhelp():
         print(help_txt)
 
 
-def main():
-    if len(sys.argv) <= 1:
+def run_main(argv):
+    if len(argv) <= 1:
         printhelp()
         return
-    action = sys.argv[1]
+    action = argv[1]
     action_def = _actions.get(action)
     if action_def is None:
         print(f"Niepoprawna akcja {action} ")
@@ -41,12 +41,16 @@ def main():
     l_pars = action_def[0]
     k_action = action_def[1]
     names = action_def[2]
-    if len(sys.argv) - 2 < l_pars:
+    if len(argv) - 2 < l_pars:
         print(
-            f"Niepoprawna liczba argumentów dla akcji {action}. Powinno być {l_pars}, wprowadzono {len(sys.argv)-2}")
+            f"Niepoprawna liczba argumentów dla akcji {action}. Powinno być {l_pars}, wprowadzono {len(argv)-2}")
         return
-    nip = sys.argv[2]
-    output = sys.argv[3]
+    nip = argv[2]
+    output = argv[3]
     K = KSEFCLI.from_os_env(nip)
-    kwargs = {n: sys.argv[4+i] for i, n in enumerate(names)}
+    kwargs = {n: argv[4+i] for i, n in enumerate(names)}
     k_action(K, output, **kwargs)
+
+
+def main():
+    run_main(argv=sys.argv)

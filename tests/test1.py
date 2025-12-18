@@ -7,9 +7,63 @@ import unittest
 import xml.etree.ElementTree as et
 
 from ksef_cli import KSEFCLI
+from ksef_cli.ksef_conf import CONF
 from ksef_cli.ksef_tokens import odczytaj_tokny
+from ksef_cli.main import run_main
 
 import helper as T
+
+
+def _wez_res(output: str) -> dict:
+    with open(output, "r") as f:
+        d = json.load(fp=f)
+        return d
+
+
+def _run_main_res(argv: list[str], output: str) -> tuple[bool, str]:
+    T.ustaw_E()
+    run_main(argv)
+    d = _wez_res(output)
+    print(d)
+    return d["OK"], d["errmess"]
+
+
+class AKsefCli:
+
+    @staticmethod
+    def odczytaj_faktury_zakupowe(C: CONF, output: str, nip: str, data_od: str, data_do: str) -> tuple[bool, str]:
+        raise NotImplementedError
+
+    @staticmethod
+    def wez_fakture(C: CONF, output: str, nip: str, ksef_number: str) -> tuple[bool, str]:
+        raise NotImplementedError
+
+
+class TestKsefCli(AKsefCli):
+
+    @staticmethod
+    def odczytaj_faktury_zakupowe(C: CONF, output: str, nip: str, data_od: str, data_do: str) -> tuple[bool, str]:
+        cli = KSEFCLI(C, nip)
+        return cli.czytaj_faktury_zakupowe(
+            output=output, data_od=data_od, data_do=data_do)
+
+    @staticmethod
+    def wez_fakture(C: CONF, output: str, nip: str, ksef_number: str) -> tuple[bool, str]:
+        cli = KSEFCLI(C, nip)
+        return cli.wez_fakture(output=output, ksef_number=ksef_number)
+
+
+class TestKsefCliMain(AKsefCli):
+
+    @staticmethod
+    def odczytaj_faktury_zakupowe(C: CONF, output: str, nip: str, data_od: str, data_do: str) -> tuple[bool, str]:
+        argv = ["", "pobierz_zakupowe", nip, output, data_od, data_do]
+        return _run_main_res(argv, output)
+
+    @staticmethod
+    def wez_fakture(C: CONF, output: str, nip: str, ksef_number: str) -> tuple[bool, str]:
+        argv = ["", "odczytaj_fakture", nip, output, ksef_number]
+        return _run_main_res(argv, output)
 
 
 class TestKSEFCLI(unittest.TestCase):
@@ -18,11 +72,8 @@ class TestKSEFCLI(unittest.TestCase):
     # helpers
     # -------------
 
-    @staticmethod
-    def _wez_res(output: str) -> dict:
-        with open(output, "r") as f:
-            d = json.load(fp=f)
-        return d
+    AT = TestKsefCli()
+    AM = TestKsefCliMain()
 
     # -------------
     # test fixture
@@ -30,6 +81,62 @@ class TestKSEFCLI(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.C = T.CO()
+
+    # -----------------
+    # abstract testy
+    # -----------------
+    def _test_odczytaj_faktury_zakupowe_brak_nip(self, A: AKsefCli):
+        nip = "xxxxxxxxxxxx"
+        res, msg = A.odczytaj_faktury_zakupowe(
+            C=self.C, nip=nip, output="xxxxxx", data_od="2023-01-01", data_do="2023-12-31")
+        self.assertFalse(res)
+        print(msg)
+        self.assertIn("Nie można odczytać tokena KSeF dla NIP", msg)
+
+    def _test_odczytaj_faktury_zakupowe_bledy_token(self, A: AKsefCli):
+        nip = "888888887"
+        # cli = KSEFCLI(self.C, nip)
+        # res, msg = cli.czytaj_faktury_zakupowe(
+        #    output="xxxxxx", data_od="2023-01-01", data_do="2023-12-31")
+        res, msg = A.odczytaj_faktury_zakupowe(
+            C=self.C, nip=nip, output="xxxxxx", data_od="2023-01-01", data_do="2023-12-31")
+        self.assertFalse(res)
+        print(msg)
+
+    def _test_pobierz_faktury_zakupowe(self, A: AKsefCli):
+        d2 = datetime.datetime.now() + datetime.timedelta(days=2)
+        d1 = d2 - datetime.timedelta(days=7)
+        d_from = d1.strftime("%Y-%m-%d")
+        d_to = d2.strftime("%Y-%m-%d")
+        print(d_from, d_to)
+        nip = T.NIP
+        output = T.temp_ojosn()
+        res = A.odczytaj_faktury_zakupowe(
+            C=self.C, output=output, nip=nip, data_od=d_from, data_do=d_to)
+        print(res)
+        self.assertTrue(res[0])
+        # sprawdz wynik
+        d = _wez_res(output)
+        print(d)
+        self.assertTrue(d["OK"])
+        faktury = d["faktury"]
+        # wez ostatnią
+        invoice_meta = faktury[-1]
+        ksef_number = invoice_meta["ksefNumber"]
+        print(ksef_number)
+        # res = cli.wez_fakture(output=output, ksef_number=ksef_number)
+        res = A.wez_fakture(C=self.C, output=output,
+                            nip=nip, ksef_number=ksef_number)
+        print(res)
+        d = _wez_res(output)
+        print(d)
+        self.assertTrue(d["OK"])
+        # odczytaj invoice
+        invoice = d['invoice']
+        with open(invoice, mode="r") as f:
+            invoice_xml = f.read()
+            print(invoice_xml)
+            et.fromstring(invoice_xml)
 
     # ------------
     # test suite
@@ -55,24 +162,20 @@ class TestKSEFCLI(unittest.TestCase):
     def test_usun_katalog_roboczy(self):
         nip = "777777776"
         cli = KSEFCLI(self.C, nip)
-        cli.clean_nip_dir()
+        output = T.temp_ojosn()
+        cli.clean_nip_dir(res_pathname=output)
 
     def test_odczytaj_faktury_zakupowe_brak_nip(self):
-        nip = "xxxxxxxxxxxx"
-        cli = KSEFCLI(self.C, nip)
-        res, msg = cli.czytaj_faktury_zakupowe(
-            output="xxxxxx", data_od="2023-01-01", data_do="2023-12-31")
-        self.assertFalse(res)
-        print(msg)
-        self.assertIn("Nie można odczytać tokena KSeF dla NIP", msg)
+        self._test_odczytaj_faktury_zakupowe_brak_nip(self.AT)
+
+    def test_main_odczytaj_faktury_zakupowe_brak_nip(self):
+        self._test_odczytaj_faktury_zakupowe_brak_nip(self.AM)
 
     def test_odczytaj_faktury_zakupowe_bledy_token(self):
-        nip = "888888887"
-        cli = KSEFCLI(self.C, nip)
-        res, msg = cli.czytaj_faktury_zakupowe(
-            output="xxxxxx", data_od="2023-01-01", data_do="2023-12-31")
-        self.assertFalse(res)
-        print(msg)
+        self._test_odczytaj_faktury_zakupowe_bledy_token(self.AT)
+
+    def test_main_odczytaj_faktury_zakupowe_bledy_token(self):
+        self._test_odczytaj_faktury_zakupowe_bledy_token(self.AM)
 
     def test_wyslij_bledna_fakture(self):
         nip = T.NIP
@@ -122,7 +225,7 @@ class TestKSEFCLI(unittest.TestCase):
         res = cli.wez_upo(res_pathname=output, ksef_number="bbbbbbb")
         print(res)
         self.assertFalse(res[0])
-        d = self._wez_res(output)
+        d = _wez_res(output)
         print(d)
         self.assertFalse(d["OK"])
 
@@ -133,7 +236,7 @@ class TestKSEFCLI(unittest.TestCase):
         res = cli.wez_upo(res_pathname=output, ksef_number=f_ksef)
         print(res)
         self.assertTrue(res[0])
-        d = self._wez_res(output)
+        d = _wez_res(output)
         print(d)
         self.assertTrue(d["OK"])
         # teraz sprawdz upo
@@ -174,35 +277,7 @@ class TestKSEFCLI(unittest.TestCase):
         self.assertTrue(res[0])
 
     def test_pobierz_faktury_zakupowe(self):
-        d2 = datetime.datetime.now() + datetime.timedelta(days=2)
-        d1 = d2 - datetime.timedelta(days=7)
-        d_from = d1.strftime("%Y-%m-%d")
-        d_to = d2.strftime("%Y-%m-%d")
-        print(d_from, d_to)
-        nip = T.NIP
-        cli = KSEFCLI(self.C, nip)
-        output = T.temp_ojosn()
-        res = cli.czytaj_faktury_zakupowe(
-            output=output, data_od=d_from, data_do=d_to)
-        print(res)
-        self.assertTrue(res[0])
-        # sprawdz wynik
-        d = self._wez_res(output)
-        print(d)
-        self.assertTrue(d["OK"])
-        faktury = d["faktury"]
-        # wez ostatnią
-        invoice_meta = faktury[-1]
-        ksef_number = invoice_meta["ksefNumber"]
-        print(ksef_number)
-        res = cli.wez_fakture(output=output, ksef_number=ksef_number)
-        print(res)
-        d = self._wez_res(output)
-        print(d)
-        self.assertTrue(d["OK"])
-        # odczytaj invoice
-        invoice = d['invoice']
-        with open(invoice, mode="r") as f:
-            invoice_xml = f.read()
-            print(invoice_xml)
-            et.fromstring(invoice_xml)
+        self._test_pobierz_faktury_zakupowe(self.AT)
+
+    def test_main_pobierz_faktury_zakupowe(self):
+        self._test_pobierz_faktury_zakupowe(self.AM)

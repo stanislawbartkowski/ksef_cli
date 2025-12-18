@@ -3,6 +3,7 @@ import shutil
 import tempfile
 from typing import Callable
 from requests import HTTPError
+import shutil
 
 import xml.etree.ElementTree as et
 
@@ -90,6 +91,10 @@ class KSEFCLI(LOGGER):
             self.logger.info(f"Zapisz UPO do {upo_file}")
             f.write(upo)
         K.close_session()
+        faktura_file = self.C.get_invoice_faktura(nip=self._nip, ksef_numer=numer_ksef)
+        self.logger.info(f"Archiwizacja faktury {invoice_path} -> {faktura_file}")
+        shutil.copyfile(invoice_path, faktura_file)
+
         return {
             "numer_ksef": numer_ksef
         }, numer_ksef
