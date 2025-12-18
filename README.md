@@ -15,6 +15,11 @@ Zmienne środowiskowe
 * KSEFCONF - plik zawierający listę dopuszczalnych NIPów oraz tokenów związanych z NIPami. Zawiera także definicje obsługiwanego środowiska KSeF 2.0 - deweloperskie/testowe, przedprodukcyjne/demo oraz produkcyjne.
 * KSEFDIR - katalog na logi operacji
 
+## Instalacja
+> pip install git+https://github.com/stanislawbartkowski/ksef_cli.git<br>
+> python<br>
+> import ksef_cli<br>
+
 ## Konfiguracja NIP i token
 
 Plik jest wskazywany przez zmienną środowiskową *KSEFCONF*. Jest to plik w formacie YAML.
