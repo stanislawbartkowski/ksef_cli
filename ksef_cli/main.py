@@ -7,6 +7,7 @@ WYSLIJ_FAKTURE = "wyslij_fakture"
 ODCZYTAJ_UPO = "odczytaj_upo"
 POBIERZ_ZAKUPOWE = "pobierz_zakupowe"
 ODCZYTAJ_FAKTURE = "odczytaj_fakture"
+WYCZYSC_DANE = "wyczysc_dane"
 
 HELP = "help"
 
@@ -14,7 +15,8 @@ _actions = {
     WYSLIJ_FAKTURE: (3, KSEFCLI.wyslij_fakture_do_ksef, ('invoice_path',)),
     ODCZYTAJ_UPO: (3, KSEFCLI.wez_upo, ('ksef_number',)),
     POBIERZ_ZAKUPOWE: (4, KSEFCLI.czytaj_faktury_zakupowe, ('data_od', 'data_do')),
-    ODCZYTAJ_FAKTURE: (3, KSEFCLI.wez_fakture, ('ksef_number',))
+    ODCZYTAJ_FAKTURE: (3, KSEFCLI.wez_fakture, ('ksef_number',)),
+    WYCZYSC_DANE: (1, KSEFCLI.clean_nip_dir, ())
 }
 
 
