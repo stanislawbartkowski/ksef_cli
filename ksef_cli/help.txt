@@ -40,7 +40,7 @@ odczytaj_fakture
     invoice: plik z odczytaną fakturą w formacie XML
 
 pobierz_zakupowe
-  python -m ksef_cli pobierz_zakupoe  <nip> <plik_na_wynik> <data_od> <data_do>
+  python -m ksef_cli pobierz_zakupowe  <nip> <plik_na_wynik> <data_od> <data_do>
 
   data_od: Początkowa data faktur do oczytania w format YYYY-MM-DD
   data_do: Data końcowa przedziału dat
