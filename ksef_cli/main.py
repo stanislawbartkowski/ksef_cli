@@ -43,7 +43,7 @@ def main():
     names = action_def[2]
     if len(sys.argv) - 2 < l_pars:
         print(
-            f"Niepoprawna liczba argumwntów dla akcji {action}. Powinno być {l_pars}, wprowadzono {len(sys.argv)-2}")
+            f"Niepoprawna liczba argumentów dla akcji {action}. Powinno być {l_pars}, wprowadzono {len(sys.argv)-2}")
         return
     nip = sys.argv[2]
     output = sys.argv[3]
