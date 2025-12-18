@@ -142,7 +142,7 @@ Zwracana wartość w pliku *plik_na_wynik*
 
 [link](https://github.com/stanislawbartkowski/ksef_pyth?tab=readme-ov-file#odczytanie-nag%C5%82%C3%B3wk%C3%B3w-faktur-zakupowych-na-podstawie-dat)
 
-> python -m ksef_cli pobierz_zakupoe  <nip> <plik_na_wynik> <data_od> <data_do>
+> python -m ksef_cli pobierz_zakupowe  <nip> <plik_na_wynik> <data_od> <data_do>
 
 Odczytuje faktury zakupowe w przedziale dat. Daty muszą być w formacie YYYY-MM-DD
 
