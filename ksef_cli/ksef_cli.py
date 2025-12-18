@@ -56,8 +56,8 @@ class KSEFCLI(LOGGER):
     def __init__(self, C: CONF, nip: str) -> None:
         super(KSEFCLI, self).__init__(C, nip)
 
-    def clean_nip_dir(self) -> None:
-        EV = self.genE(E.WYCZYSC_DANE, output=None)
+    def clean_nip_dir(self, res_pathname: str) -> None:
+        EV = self.genE(E.WYCZYSC_DANE, output=res_pathname)
         work_dir = self.C.work_nip_dir(self.nip)
         msg = f"Usunięto katalog roboczy dla NIP {self.nip}: {work_dir}"
         self.logger.info(msg)

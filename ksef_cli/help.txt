@@ -6,6 +6,7 @@ Akcje:
   odczytaj_upo Odczytaj plik UPO do wysłanej i zaakceptowanej faktury
   pobierz_zakupowe Odczytaj nagłówki (metadata) faktur zakupowych
   odczytaj_fakture Odczytaj fakturę na podstawie nadanego numeru KSeF
+  wyczysc_dane Wyczyść lokalne dane dla NIPu (dla celów testowych)
 
 Nip:
   Numer NIP użytkownika KSeF 2.0. NIP musi mieć odpowiednik z pliku konfiguracyjnym
@@ -50,4 +51,6 @@ pobierz_zakupowe
     errmess
     faktury: plik w formacie JSON z listą odczytanych nagłówków faktur zakupowych
 
+wyczysc_dane
+  python -m ksef_cli pobierz_zakupoe  <nip> <plik_na_wynik> <data_od> <data_do>
 
