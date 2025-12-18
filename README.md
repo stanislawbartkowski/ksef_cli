@@ -76,7 +76,7 @@ Przykładowy fragment pliku events.csv
 
 Wywołanie:
 
-> python -m ksef_cli <akcja> <nip> <plik_na_wynik> <dodatkowe_parametry>
+> python -m ksef_cli <akcja> \<nip\> <plik_na_wynik> <dodatkowe_parametry>
 
 akcja:
 * wyslij_fakture Wysłanie faktury do system KSeF 2.0
@@ -107,7 +107,7 @@ Wywołanie nie zwraca znaczącego *exit code*. Wynik akcji, także niepowodzenie
 
 [link](https://github.com/stanislawbartkowski/ksef_pyth?tab=readme-ov-file#wys%C5%82anie-faktury)
 
-> python -m ksef_cli wyslij_fakture <nip> <plik_na_wynik> <plik XML z fakturą do wysłania>
+> python -m ksef_cli wyslij_fakture \<nip\> <plik_na_wynik> <plik XML z fakturą do wysłania>
 
 Zwracana wartość w pliku *plik_na_wynik*
 * OK
@@ -118,7 +118,7 @@ Zwracana wartość w pliku *plik_na_wynik*
 
 [link](https://github.com/stanislawbartkowski/ksef_pyth?tab=readme-ov-file#odczytanie-upo)
 
-> python -m ksef_cli odczytaj_upo  <nip> <plik_na_wynik> <numer_ksef>
+> python -m ksef_cli odczytaj_upo  \<nip\> <plik_na_wynik> <numer_ksef>
 
 Zwracana wartość w pliku *plik_na_wynik*
 * OK
@@ -131,7 +131,7 @@ UWAGA: UPO jest odczytywane bezpośrednio po wysłaniu faktury *wyslij_fakture* 
 
 [link](https://github.com/stanislawbartkowski/ksef_pyth?tab=readme-ov-file#odczytanie-faktury-wed%C5%82ug-numeru-ksef)
 
-> python -m ksef_cli odczytaj_fakture  <nip> <plik_na_wynik> <numer_ksef>
+> python -m ksef_cli odczytaj_fakture  \<nip\> <plik_na_wynik> <numer_ksef>
 
 Zwracana wartość w pliku *plik_na_wynik*
 * OK
@@ -142,7 +142,7 @@ Zwracana wartość w pliku *plik_na_wynik*
 
 [link](https://github.com/stanislawbartkowski/ksef_pyth?tab=readme-ov-file#odczytanie-nag%C5%82%C3%B3wk%C3%B3w-faktur-zakupowych-na-podstawie-dat)
 
-> python -m ksef_cli pobierz_zakupoe  <nip> <plik_na_wynik> <data_od> <data_do>
+> python -m ksef_cli pobierz_zakupowe  \<nip\> <plik_na_wynik> <data_od> <data_do>
 
 Odczytuje faktury zakupowe w przedziale dat. Daty muszą być w formacie YYYY-MM-DD
 
