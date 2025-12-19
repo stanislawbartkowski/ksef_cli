@@ -90,8 +90,10 @@ class KSEFCLI(LOGGER):
             self.logger.info(f"Zapisz UPO do {upo_file}")
             f.write(upo)
         K.close_session()
-        faktura_file = self.C.get_invoice_faktura(nip=self._nip, ksef_numer=numer_ksef)
-        self.logger.info(f"Archiwizacja faktury {invoice_path} -> {faktura_file}")
+        faktura_file = self.C.get_invoice_faktura(
+            nip=self._nip, ksef_numer=numer_ksef)
+        self.logger.info(
+            f"Archiwizacja faktury {invoice_path} -> {faktura_file}")
         shutil.copyfile(invoice_path, faktura_file)
 
         return {
@@ -123,7 +125,7 @@ class KSEFCLI(LOGGER):
     @ksef_action(action=E.WEZ_FAKTURE)
     def wez_fakture(self, K: KSEFSDK, ksef_number: str) -> tuple[dict, str]:
         invoice = K.get_invoice(ksef_number=ksef_number)
-        with tempfile.NamedTemporaryFile(delete_on_close=False, delete=False) as t:
+        with tempfile.NamedTemporaryFile(delete=False) as t:
             t.write(invoice.encode())
             return {
                 "invoice": t.name
