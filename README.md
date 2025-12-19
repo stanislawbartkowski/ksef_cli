@@ -8,6 +8,10 @@ Dodatkowe cechy rozwiązania:
 * Tworzenie dziennika i logów, historii wykonywanych operacji.
 * Możliwość wywołania funkcjonalności z poziomu bash lub bezpośrednio jako komenda Python3
 
+## Python
+
+Testowane dla wersji: 3.10, 3.11 i 3.12
+
 ## Konfiguracja
 
 Zmienne środowiskowe
