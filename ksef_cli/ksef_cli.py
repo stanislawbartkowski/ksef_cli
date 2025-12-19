@@ -3,7 +3,6 @@ import shutil
 import tempfile
 from typing import Callable
 from requests import HTTPError
-import shutil
 
 import xml.etree.ElementTree as et
 
