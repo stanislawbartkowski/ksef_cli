@@ -3,7 +3,7 @@ import datetime
 
 from ksef_cli.ksef_conf import CONF
 
-from ksef.sdk.konwdokument import KONWDOKUMENT
+from xml_konwerter import konwertujdok
 
 NIP = "7497725064"
 
@@ -13,6 +13,10 @@ NIEPOPRAWNA_FAKTURA = "FA_3_Przykład_9_niepoprawna.xml"
 FAKTURA_WZORZEC = "FA_3_Przykład_9_pattern.xml"
 FAKTURA_ZAKUP = "FA_3_Przykład_8_zakup.xml"
 
+_DATA_WYSTAWIENIA = "DATA_WYSTAWIENIA"
+_NIP = "NIP"
+_NIP_NABYWCA = "NIP_NABYWCA"
+_NUMER_FAKTURY = "NUMER_FAKTURY"
 
 def _workdir() -> str:
     return os.path.join(os.path.dirname(__file__), 'worktemp')
@@ -64,14 +68,14 @@ def testdatadir(filexml: str) -> str:
     return os.path.join(dir, filexml)
 
 
-def prepare_invoice(patt) -> str:
+def prepare_invoice(patt:str) -> str:
     inpath = testdatadir(patt)
     outpath = _temp_dir("faktura.xml")
     zmienne = {
-        KONWDOKUMENT.DATA_WYSTAWIENIA: _today(),
-        KONWDOKUMENT.NIP: NIP,
-        KONWDOKUMENT.NIP_NABYWCA: NIP_NABYWCA,
-        KONWDOKUMENT.NUMER_FAKTURY: _gen_numer_faktury()
+        _DATA_WYSTAWIENIA: _today(),
+        _NIP: NIP,
+        _NIP_NABYWCA: NIP_NABYWCA,
+        _NUMER_FAKTURY: _gen_numer_faktury()
     }
-    KONWDOKUMENT.konwertuj(sou=inpath, dest=outpath, zmienne=zmienne)
+    konwertujdok(sou=inpath, dest=outpath, d=zmienne)
     return outpath
