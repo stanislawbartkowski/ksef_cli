@@ -1,12 +1,12 @@
 ## Opis
 
-Jest to "command line" rozszerzenie rozwiązania: https://github.com/stanislawbartkowski/ksef_pyth. Umożliwia komunikację z systemem KSeF z poziomu poleceń systemu Linux oraz integrację z innymi systemami.
+Jest to "command line" rozszerzenie rozwiązania: https://github.com/stanislawbartkowski/ksef_pyth. Umożliwia komunikację z systemem KSeF z poprzez wywołanie python3. Daje to możliwość integracji z systemami, które nie są oparte w Python.
 
 Dodatkowe cechy rozwiązania:
 
 * Konfiguracja tokena (tokenów) z pliku tekstowego.
 * Tworzenie dziennika i logów, historii wykonywanych operacji.
-* Możliwość wywołania funkcjonalności z poziomu bash lub bezpośrednio jako komenda Python3
+* Możliwość wywołania funkcjonalności z poziomu bash lub bezpośrednio jako komenda python3
 
 ## Python
 
@@ -112,7 +112,7 @@ Działanie:
 Dodatkowa uwaga:
 Wywołanie nie zwraca znaczącego *exit code*. Wynik akcji, także niepowodzenie, trzeba odczytać z pliku *plik_na_wynik*
 
-## wyslij_faktura
+## wyslij_fakture
 
 [link](https://github.com/stanislawbartkowski/ksef_pyth?tab=readme-ov-file#wys%C5%82anie-faktury)
 
