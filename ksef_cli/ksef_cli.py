@@ -5,6 +5,7 @@ from typing import Callable
 from requests import HTTPError
 
 import xml.etree.ElementTree as et
+import zipfile
 
 from ksef import KSEFSDK
 
@@ -130,3 +131,40 @@ class KSEFCLI(LOGGER):
             return {
                 "invoice": t.name
             }, ""
+
+    @ksef_action(action=E.WYSLIJ_WSADOWO)
+    def wyslij_wsadowo_do_ksef(self, K: KSEFSDK, faktury_dir: str) -> tuple[dict, str]:
+
+        files = os.listdir(faktury_dir)
+        self.logger.info(f"Szukanie faktur w katalogy {faktury_dir}")
+
+        with tempfile.NamedTemporaryFile(delete=False) as t:
+            with zipfile.ZipFile(t.name, "w", zipfile.ZIP_DEFLATED) as zip:
+                for f in files:
+                    if not f.endswith(".xml"):
+                        continue
+                    full_path = os.path.join(faktury_dir, f)
+                    self.logger.info(f"Faktura {full_path}")
+                    zip.write(full_path)
+
+        # teraz odczytuj
+        maxPartSize = 100 * 1000 * 1000  # 100 MB
+
+        def bytes_generator():
+            with open(t.tname, "rb") as z:
+                b = z.read(maxPartSize)
+                if b is None:
+                    return
+                yield b
+
+        ok, err_mess, invoices = K.send_batch_session_bytes(
+            payload=bytes_generator)
+        os.unlink(t.name)
+        if not ok:
+            raise ValueError(err_mess)
+
+        msg = f"Wysłano {len(invoices)}, błędnych {len([i for i in invoices if not i.ok])}"
+        self.logger.info(msg)
+        return {
+            "invoices": invoices
+        }, msg

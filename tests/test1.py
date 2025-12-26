@@ -38,6 +38,14 @@ class AKsefCli:
     def wez_fakture(C: CONF, output: str, nip: str, ksef_number: str) -> tuple[bool, str]:
         raise NotImplementedError
 
+    @staticmethod
+    def wyslij_fakture(C: CONF, output: str, nip: str, invoice_path: str) -> tuple[bool, str]:
+        raise NotImplementedError
+
+    @staticmethod
+    def wez_upo(C: CONF, output: str, nip: str, ksef_numer: str) -> tuple[bool, str]:
+        raise NotImplementedError
+
 
 class TestKsefCli(AKsefCli):
 
@@ -52,6 +60,16 @@ class TestKsefCli(AKsefCli):
         cli = KSEFCLI(C, nip)
         return cli.wez_fakture(output=output, ksef_number=ksef_number)
 
+    @staticmethod
+    def wyslij_fakture(C: CONF, output: str, nip: str, invoice_path: str) -> tuple[bool, str]:
+        cli = KSEFCLI(C, nip)
+        return cli.wyslij_fakture_do_ksef(output=output, invoice_path=invoice_path)
+
+    @staticmethod
+    def wez_upo(C: CONF, output: str, nip: str, ksef_numer: str) -> tuple[bool, str]:
+        cli = KSEFCLI(C, nip)
+        return cli.wez_upo(res_pathname=output, ksef_number=ksef_numer)
+
 
 class TestKsefCliMain(AKsefCli):
 
@@ -65,15 +83,18 @@ class TestKsefCliMain(AKsefCli):
         argv = ["", "odczytaj_fakture", nip, output, ksef_number]
         return _run_main_res(argv, output)
 
+    @staticmethod
+    def wyslij_fakture(C: CONF, output: str, nip: str, invoice_path: str) -> tuple[bool, str]:
+        argv = ["", "wyslij_fakture", nip, output, invoice_path]
+        return _run_main_res(argv, output)
 
-class TestKSEFCLI(unittest.TestCase):
+    @staticmethod
+    def wez_upo(C: CONF, output: str, nip: str, ksef_numer: str) -> tuple[bool, str]:
+        argv = ["", "odczytaj_upo", nip, output, ksef_numer]
+        return _run_main_res(argv, output)
 
-    # -------------
-    # helpers
-    # -------------
 
-    AT = TestKsefCli()
-    AM = TestKsefCliMain()
+class AbstractTestKSEFCLI(unittest.TestCase):
 
     # -------------
     # test fixture
@@ -138,6 +159,106 @@ class TestKSEFCLI(unittest.TestCase):
             print(invoice_xml)
             et.fromstring(invoice_xml)
 
+    def _test_wyslij_bledna_fakture(self, A: AKsefCli):
+        nip = T.NIP
+        fa = T.NIEPOPRAWNA_FAKTURA
+        invoice_path = T.testdatadir(fa)
+        output = T.temp_ojosn()
+        res = A.wyslij_fakture(C=self.C, output=output,
+                               nip=nip, invoice_path=invoice_path)
+        print(res)
+        self.assertFalse(res[0])
+        self.assertIn("Błąd", res[1])
+        # sprawdz, czy jest utworzony output
+        with open(output, "r") as f:
+            d = json.load(fp=f)
+        print(d)
+        self.assertFalse(d["OK"])
+        self.assertIn("Błąd", d["errmess"])
+
+    def _test_wyslij_fakture_sprzedazy(self, A: AKsefCli):
+        nip = T.NIP
+        fa = T.FAKTURA_WZORZEC
+        invoice_path = T.prepare_invoice(fa)
+        cli = KSEFCLI(self.C, nip)
+        output = T.temp_ojosn()
+        res = A.wyslij_fakture(C=self.C, output=output,
+                               nip=nip, invoice_path=invoice_path)
+        print(res)
+        self.assertTrue(res[0])
+        with open(output, "r") as f:
+            d = json.load(fp=f)
+        print(d)
+        self.assertTrue(d["OK"])
+        f_ksef = d["numer_ksef"]
+        print(f_ksef)
+        # sprawdz, czy odczytane upo
+        upo = self.C.get_invoice_upo(nip, f_ksef)
+        with open(upo, "r") as f:
+            upo_xml = f.read()
+            et.fromstring(upo_xml)
+        return cli, f_ksef, nip
+
+    def _test_wez_upo_nie_istnieje(self, A: AKsefCli):
+        nip = "aaaaaaaaaa"
+        output = T.temp_ojosn()
+        res = A.wez_upo(C=self.C, output=output, nip=nip, ksef_numer="bbbbbbb")
+        print(res)
+        self.assertFalse(res[0])
+        d = _wez_res(output)
+        print(d)
+        self.assertFalse(d["OK"])
+
+    def _test_wez_upo_dla_faktury(self, A: AKsefCli):
+        _, f_ksef, nip = self._test_wyslij_fakture_sprzedazy(A)
+        # teraz wez upo
+        output = T.temp_ojosn()
+        res = A.wez_upo(C=self.C, output=output, nip=nip, ksef_numer=f_ksef)
+        print(res)
+        self.assertTrue(res[0])
+        d = _wez_res(output)
+        print(d)
+        self.assertTrue(d["OK"])
+        # teraz sprawdz upo
+        upo = d["upo"]
+        # sprobuj odczytac
+        with open(upo, "r") as f:
+            _ = f.read()
+
+    def _test_faktura_zakupowa_blad(self, A: AKsefCli):
+        nip = T.NIP
+        fa = T.FAKTURA_ZAKUP
+        # faktura, z zamienionym nipem nabywcy i sprzedawcy
+        # NIP - nabywca, NIP_NABYWCA - sprzedawca
+        invoice_path = T.prepare_invoice(fa)
+        output = T.temp_ojosn()
+        res = A.wyslij_fakture(C=self.C, output=output,
+                               nip=nip, invoice_path=invoice_path)
+        print(res)
+        # tutaj jest błąd, gdy próba wystawienia faktury w cudzym imieniu
+        self.assertFalse(res[0])
+        errmess = res[1]
+        self.assertIn(
+            "nie jest uprawniony do wystawienia faktury w imieniu", errmess)
+
+    def _test_faktura_zakupowa(self, A: AKsefCli):
+        nip = T.NIP_NABYWCA
+        fa = T.FAKTURA_ZAKUP
+        # faktura, z zamienionym nipem nabywcy i sprzedawcy
+        # NIP - nabywca, NIP_NABYWCA - sprzedawca
+        invoice_path = T.prepare_invoice(fa)
+        output = T.temp_ojosn()
+        res = A.wyslij_fakture(C=self.C, output=output,
+                               nip=nip, invoice_path=invoice_path)
+        print(res)
+        # tutaj jest błąd, gdy próba wystawienia faktury w cudzym imieniu
+        self.assertTrue(res[0])
+
+
+class TestKSEFCli(AbstractTestKSEFCLI):
+
+    AT = TestKsefCli()
+
     # ------------
     # test suite
     # ------------
@@ -168,116 +289,58 @@ class TestKSEFCLI(unittest.TestCase):
     def test_odczytaj_faktury_zakupowe_brak_nip(self):
         self._test_odczytaj_faktury_zakupowe_brak_nip(self.AT)
 
-    def test_main_odczytaj_faktury_zakupowe_brak_nip(self):
-        self._test_odczytaj_faktury_zakupowe_brak_nip(self.AM)
-
     def test_odczytaj_faktury_zakupowe_bledy_token(self):
         self._test_odczytaj_faktury_zakupowe_bledy_token(self.AT)
 
-    def test_main_odczytaj_faktury_zakupowe_bledy_token(self):
-        self._test_odczytaj_faktury_zakupowe_bledy_token(self.AM)
-
     def test_wyslij_bledna_fakture(self):
-        nip = T.NIP
-        fa = T.NIEPOPRAWNA_FAKTURA
-        invoice_path = T.testdatadir(fa)
-        cli = KSEFCLI(self.C, nip)
-        output = T.temp_ojosn()
-        res = cli.wyslij_fakture_do_ksef(
-            output=output, invoice_path=invoice_path)
-        print(res)
-        self.assertFalse(res[0])
-        self.assertIn("Błąd", res[1])
-        # sprawdz, czy jest utworzony output
-        with open(output, "r") as f:
-            d = json.load(fp=f)
-        print(d)
-        self.assertFalse(d["OK"])
-        self.assertIn("Błąd", d["errmess"])
+        self._test_wyslij_bledna_fakture(self.AT)
 
     def test_wyslij_fakture_sprzedazy(self):
-        nip = T.NIP
-        fa = T.FAKTURA_WZORZEC
-        invoice_path = T.prepare_invoice(fa)
-        cli = KSEFCLI(self.C, nip)
-        output = T.temp_ojosn()
-        res = cli.wyslij_fakture_do_ksef(
-            output=output, invoice_path=invoice_path)
-        print(res)
-        self.assertTrue(res[0])
-        with open(output, "r") as f:
-            d = json.load(fp=f)
-        print(d)
-        self.assertTrue(d["OK"])
-        f_ksef = d["numer_ksef"]
-        print(f_ksef)
-        # sprawdz, czy odczytane upo
-        upo = self.C.get_invoice_upo(nip, f_ksef)
-        with open(upo, "r") as f:
-            upo_xml = f.read()
-            et.fromstring(upo_xml)
-        return cli, f_ksef
+        self._test_wyslij_fakture_sprzedazy(self.AT)
 
     def test_wez_upo_nie_istnieje(self):
-        nip = "aaaaaaaaaa"
-        cli = KSEFCLI(self.C, nip)
-        output = T.temp_ojosn()
-        res = cli.wez_upo(res_pathname=output, ksef_number="bbbbbbb")
-        print(res)
-        self.assertFalse(res[0])
-        d = _wez_res(output)
-        print(d)
-        self.assertFalse(d["OK"])
+        self._test_wez_upo_nie_istnieje(self.AT)
 
     def test_wez_upo_dla_faktury(self):
-        cli, f_ksef = self.test_wyslij_fakture_sprzedazy()
-        # teraz wez upo
-        output = T.temp_ojosn()
-        res = cli.wez_upo(res_pathname=output, ksef_number=f_ksef)
-        print(res)
-        self.assertTrue(res[0])
-        d = _wez_res(output)
-        print(d)
-        self.assertTrue(d["OK"])
-        # teraz sprawdz upo
-        upo = d["upo"]
-        # sprobuj odczytac
-        with open(upo, "r") as f:
-            _ = f.read()
+        self._test_wez_upo_dla_faktury(self.AT)
 
     def test_faktura_zakupowa_blad(self):
-        nip = T.NIP
-        fa = T.FAKTURA_ZAKUP
-        # faktura, z zamienionym nipem nabywcy i sprzedawcy
-        # NIP - nabywca, NIP_NABYWCA - sprzedawca
-        invoice_path = T.prepare_invoice(fa)
-        cli = KSEFCLI(self.C, nip)
-        output = T.temp_ojosn()
-        res = cli.wyslij_fakture_do_ksef(
-            output=output, invoice_path=invoice_path)
-        print(res)
-        # tutaj jest błąd, gdy próba wystawienia faktury w cudzym imieniu
-        self.assertFalse(res[0])
-        errmess = res[1]
-        self.assertIn(
-            "nie jest uprawniony do wystawienia faktury w imieniu", errmess)
+        self._test_faktura_zakupowa_blad(self.AT)
 
     def test_faktura_zakupowa(self):
-        nip = T.NIP_NABYWCA
-        fa = T.FAKTURA_ZAKUP
-        # faktura, z zamienionym nipem nabywcy i sprzedawcy
-        # NIP - nabywca, NIP_NABYWCA - sprzedawca
-        invoice_path = T.prepare_invoice(fa)
-        cli = KSEFCLI(self.C, nip)
-        output = T.temp_ojosn()
-        res = cli.wyslij_fakture_do_ksef(
-            output=output, invoice_path=invoice_path)
-        print(res)
-        # tutaj jest błąd, gdy próba wystawienia faktury w cudzym imieniu
-        self.assertTrue(res[0])
+        self._test_faktura_zakupowa(self.AT)
 
     def test_pobierz_faktury_zakupowe(self):
         self._test_pobierz_faktury_zakupowe(self.AT)
 
+
+class TestKSEFCliMain(AbstractTestKSEFCLI):
+
+    AM = TestKsefCliMain()
+
+    def test_main_odczytaj_faktury_zakupowe_brak_nip(self):
+        self._test_odczytaj_faktury_zakupowe_brak_nip(self.AM)
+
+    def test_main_odczytaj_faktury_zakupowe_bledy_token(self):
+        self._test_odczytaj_faktury_zakupowe_bledy_token(self.AM)
+
+    def test_main_wyslij_bledna_fakture(self):
+        self._test_wyslij_bledna_fakture(self.AM)
+
     def test_main_pobierz_faktury_zakupowe(self):
         self._test_pobierz_faktury_zakupowe(self.AM)
+
+    def test_main_wyslij_fakture_sprzedazy(self):
+        return self._test_wyslij_fakture_sprzedazy(self.AM)
+
+    def test_main_wez_upo_nie_istnieje(self):
+        return self._test_wez_upo_nie_istnieje(self.AM)
+
+    def test_main_wez_upo_dla_faktury(self):
+        return self._test_wez_upo_dla_faktury(self.AM)
+
+    def test_main_faktura_zakupowa_blad(self):
+        return self._test_faktura_zakupowa_blad(self.AM)
+
+    def test_main_faktura_zakupowa(self):
+        self._test_faktura_zakupowa(self.AM)

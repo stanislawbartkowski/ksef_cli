@@ -42,13 +42,15 @@ class E(_A):
     WYSLIJ_FAKTURE = 2
     WEZ_UPO = 3
     WEZ_FAKTURE = 4
+    WYSLIJ_WSADOWO = 5
 
     _d = {
         WYCZYSC_DANE: "Wyczyść dane robocze",
         CZYTANIE_FAKTUR_ZAKUPOWYCH: "Czytanie faktur zakupowych",
         WYSLIJ_FAKTURE: "Wyślij fakture do KSeF",
         WEZ_UPO: "Weź UPO",
-        WEZ_FAKTURE: "Weź fakturę z KSeF"
+        WEZ_FAKTURE: "Weź fakturę z KSeF",
+        WYSLIJ_WSADOWO: "Wyślij faktury wsadowo"
     }
 
     def __init__(self, C: CONF, nip: str, action: int, output: str | None):
