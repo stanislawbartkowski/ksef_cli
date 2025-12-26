@@ -92,6 +92,7 @@ akcja:
 * odczytaj_upo Odczytaj plik UPO do wysłanej i zaakceptowanej faktury
 * pobierz_zakupowe Odczytaj nagłówki (metadata) faktur zakupowych
 * odczytaj_fakture Odczytaj fakturę na podstawie nadanego numeru KSeF
+* wyslij_wsadowo Wysyła paczkę faktur w sesji wsadowej
 
 nip:
 * Numer NIP użytkownika KSeF 2.0. Numer NIP musi być zawarty w plik *KSEFCONF*
@@ -122,6 +123,24 @@ Zwracana wartość w pliku *plik_na_wynik*
 * OK
 * errmess
 * numer_ksef Jeśli faktura jest zaakceptowana w systemie KSeF 2.0, to nadany przez KSeF numer
+
+## wyslij_wsadowo
+[link](https://github.com/stanislawbartkowski/ksef_pyth/tree/main?tab=readme-ov-file#wys%C5%82anie-paczki-faktur-w-trybie-wsadowym)
+
+> python -m ksef_cli wyslij_wsadowo <nip> <plik_na_wynik> <katalog z paczką faktur>
+
+* Katalog z paczką faktur. Katalog w którym znajdują się faktury XML gotowe do wysłania do systemu KSeF. Wysyłane są tylko pliki z rozszerzeniem \.xml, inne pliki są ignorowane. UWAGA: w środowisku testowym akceptowanych jest tylko pierwsze 10 faktur, pozostałe są ignorowane bez sygnalizowania żadnego błędu.
+
+Zwracana wartość w pliku *plik_na_wynik*
+* OK
+* errmess
+* invoices Lista wysłanych faktur z nadanym numerem KSeF. Jeden element listy zawiera następujące informacje:
+  * ok True/False True jeśli faktura została zaakceptowana w KSeF 2.0 i ma nadany numer KSeF
+  * msg Jeśli ok=False, to komunikat o błędzie
+  * ordinalNumber Numer kolejny faktury w paczce faktur (od 1)
+  * invoiceNumber Numer faktury pobrany ze źródłowego pliku XML
+  * ksefNumber Jeśli faktura jest zaakceptowana, to nadany numer KSeF
+  
 
 ## odczytaj_upo
 
