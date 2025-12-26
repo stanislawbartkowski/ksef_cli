@@ -129,7 +129,10 @@ Zwracana wartość w pliku *plik_na_wynik*
 
 > python -m ksef_cli wyslij_wsadowo <nip> <plik_na_wynik> <katalog z paczką faktur>
 
-* Katalog z paczką faktur. Katalog w którym znajdują się faktury XML gotowe do wysłania do systemu KSeF. Wysyłane są tylko pliki z rozszerzeniem \.xml, inne pliki są ignorowane. UWAGA: w środowisku testowym akceptowanych jest tylko pierwsze 10 faktur, pozostałe są ignorowane bez sygnalizowania żadnego błędu.
+* \<katalog z paczką faktur\>. Katalog w którym znajdują się faktury XML gotowe do wysłania do systemu KSeF. Wysyłane są tylko pliki z rozszerzeniem \.xml, inne pliki są ignorowane. UWAGA: w środowisku testowym akceptowanych jest tylko pierwsze 10 faktur, pozostałe są ignorowane bez sygnalizowania żadnego błędu.
+
+Działanie:
+* Faktury z katalogu są pakowane w formacie ZIP i wysyłane do systemu KSeF zgodnie ze specyfikacją API. Jeśli rozmiar po spakowaniu przekracza 100MB, to dane są odpowiednio dzielone na poszczególne paczki.
 
 Zwracana wartość w pliku *plik_na_wynik*
 * OK
