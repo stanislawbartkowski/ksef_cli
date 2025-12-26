@@ -74,6 +74,19 @@ class KSEFCLI(LOGGER):
             "faktury": faktury_zakupowe
         }, f"{data_od} - {data_do}"
 
+    def _zapisz_upo(self, ksef_numer: str, upo: str):
+        upo_file = self.C.get_invoice_upo(self._nip, ksef_numer)
+        with open(upo_file, mode="w") as f:
+            self.logger.info(f"Zapisz UPO do {upo_file}")
+            f.write(upo)
+
+    def _zapamiętaj_fakture(self, ksef_numer: str, invoice_path: str):
+        faktura_file = self.C.get_invoice_faktura(
+            nip=self._nip, ksef_numer=ksef_numer)
+        self.logger.info(
+            f"Archiwizacja faktury {invoice_path} -> {faktura_file}")
+        shutil.copyfile(invoice_path, faktura_file)
+
     @ksef_action(action=E.WYSLIJ_FAKTURE)
     def wyslij_fakture_do_ksef(self, K: KSEFSDK, invoice_path: str) -> tuple[dict, str]:
         with open(invoice_path, mode="r") as f:
@@ -86,16 +99,10 @@ class KSEFCLI(LOGGER):
         self.logger.info(f"Faktura wysłana do KSeF. KSeF numer {numer_ksef}")
         # zapisz upo
         upo = K.pobierz_upo()
-        upo_file = self.C.get_invoice_upo(self._nip, numer_ksef)
-        with open(upo_file, mode="w") as f:
-            self.logger.info(f"Zapisz UPO do {upo_file}")
-            f.write(upo)
+        self._zapisz_upo(ksef_numer=numer_ksef, upo=upo)
         K.close_session()
-        faktura_file = self.C.get_invoice_faktura(
-            nip=self._nip, ksef_numer=numer_ksef)
-        self.logger.info(
-            f"Archiwizacja faktury {invoice_path} -> {faktura_file}")
-        shutil.copyfile(invoice_path, faktura_file)
+        self._zapamiętaj_fakture(
+            ksef_numer=numer_ksef, invoice_path=invoice_path)
 
         return {
             "numer_ksef": numer_ksef
@@ -136,7 +143,9 @@ class KSEFCLI(LOGGER):
     def wyslij_wsadowo_do_ksef(self, K: KSEFSDK, faktury_dir: str) -> tuple[dict, str]:
 
         files = os.listdir(faktury_dir)
-        self.logger.info(f"Szukanie faktur w katalogy {faktury_dir}")
+        self.logger.info(f"Szukanie faktur w katalogu {faktury_dir}")
+
+        faktury = []
 
         with tempfile.NamedTemporaryFile(delete=False) as t:
             with zipfile.ZipFile(t.name, "w", zipfile.ZIP_DEFLATED) as zip:
@@ -144,6 +153,7 @@ class KSEFCLI(LOGGER):
                     if not f.endswith(".xml"):
                         continue
                     full_path = os.path.join(faktury_dir, f)
+                    faktury.append(full_path)
                     self.logger.info(f"Faktura {full_path}")
                     zip.write(full_path)
 
@@ -151,20 +161,33 @@ class KSEFCLI(LOGGER):
         maxPartSize = 100 * 1000 * 1000  # 100 MB
 
         def bytes_generator():
-            with open(t.tname, "rb") as z:
+            with open(t.name, "rb") as z:
                 b = z.read(maxPartSize)
                 if b is None:
                     return
                 yield b
 
+        def _zapisz_upo(i: KSEFSDK.INVOICES, upo: str):
+            numer_ksef = i.ksefNumber
+            self._zapisz_upo(ksef_numer=numer_ksef, upo=upo)
+
         ok, err_mess, invoices = K.send_batch_session_bytes(
-            payload=bytes_generator)
+            payload=bytes_generator(), wez_upo=_zapisz_upo)
         os.unlink(t.name)
         if not ok:
             raise ValueError(err_mess)
 
+        # zapamiętaj źrodłowe faktury
+        for i in [i for i in invoices if i.ok]:
+            ksef_numer = i.ksefNumber
+            i_number = i.ordinalNumer  # numerowane od 1
+            self._zapamiętaj_fakture(
+                ksef_numer=ksef_numer, invoice_path=faktury[i_number-1])
+
         msg = f"Wysłano {len(invoices)}, błędnych {len([i for i in invoices if not i.ok])}"
         self.logger.info(msg)
+        # zamien namedtuple na dictionary
+        d_invoices = [d._asdict() for d in invoices]
         return {
-            "invoices": invoices
+            "invoices": d_invoices
         }, msg

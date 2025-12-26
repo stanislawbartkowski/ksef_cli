@@ -78,7 +78,7 @@ class E(_A):
                 "a", "action:", "result", "errmess", "nip", "addinfo"]
         for f in self.C.get_events_file(), self.C.get_nip_events_file(self.nip):
             with open(f, 'a', newline='', encoding='utf-8') as f:
-                writer = csv.DictWriter(f, fieldnames=list)
+                writer = csv.DictWriter(f, fieldnames=list, delimiter="|")
                 if f.tell() == 0:
                     writer.writeheader()
                 writer.writerow(info)

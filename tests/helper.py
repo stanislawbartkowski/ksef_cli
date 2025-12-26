@@ -18,6 +18,7 @@ _NIP = "NIP"
 _NIP_NABYWCA = "NIP_NABYWCA"
 _NUMER_FAKTURY = "NUMER_FAKTURY"
 
+
 def _workdir() -> str:
     return os.path.join(os.path.dirname(__file__), 'worktemp')
 
@@ -38,11 +39,25 @@ def ustaw_E():
     CONF.test_ustaw_os_env(conf_path, work_dir)
 
 
-def _temp_dir(f: str) -> str:
+def temp_dir() -> str:
     tmp_dir = os.path.join(_workdir(), "tmp")
     if not os.path.exists(tmp_dir):
         os.makedirs(tmp_dir)
-    return os.path.join(tmp_dir, f)
+    return tmp_dir
+
+
+def temp_dir_remove_xml():
+    tmp_dir = temp_dir()
+    l_dir = os.listdir(tmp_dir)
+    for l in l_dir:
+        if l.endswith(".xml"):
+            full_path = os.path.join(tmp_dir, l)
+            os.unlink(full_path)
+
+
+def _temp_dir(f: str) -> str:
+    t_dir = temp_dir()
+    return os.path.join(t_dir, f)
 
 
 def temp_res() -> str:
@@ -68,14 +83,21 @@ def testdatadir(filexml: str) -> str:
     return os.path.join(dir, filexml)
 
 
-def prepare_invoice(patt:str) -> str:
+def prepare_invoice_faktur(patt: str, faktura: str) -> tuple[str, str]:
     inpath = testdatadir(patt)
-    outpath = _temp_dir("faktura.xml")
+    outpath = _temp_dir(faktura)
+    invoice = _gen_numer_faktury()
     zmienne = {
         _DATA_WYSTAWIENIA: _today(),
         _NIP: NIP,
         _NIP_NABYWCA: NIP_NABYWCA,
-        _NUMER_FAKTURY: _gen_numer_faktury()
+        _NUMER_FAKTURY: invoice
     }
     konwertujdok(sou=inpath, dest=outpath, d=zmienne)
+    return outpath, invoice
+
+
+def prepare_invoice(patt: str) -> str:
+    temp_dir_remove_xml()
+    outpath, _ = prepare_invoice_faktur(patt, "faktura.xml")
     return outpath
