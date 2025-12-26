@@ -26,8 +26,9 @@ def test3():
     nip = "1234567890"
     C = T.CO()
     cli = KSEFCLI(C, nip)
+    output = T.temp_ojosn()
     cli.logger.info("KSEFCLI initialized successfully.")
-    cli.clean_nip_dir()
+    cli.clean_nip_dir(res_pathname=output)
 
 
 def test4():
@@ -35,8 +36,7 @@ def test4():
     nip = "1234567890"
     cli = KSEFCLI(C, nip)
     output = T.temp_ojosn()
-    res = cli.czytaj_faktury_zakupowe(
-        output, "2023-01-01", "2023-12-31")
+    res = cli.czytaj_faktury_zakupowe(output, "2023-01-01", "2023-12-31")
     print(res)
 
 
@@ -48,7 +48,7 @@ def test5():
     cli = KSEFCLI(C, nip)
     output = T.temp_ojosn()
     res = cli.wyslij_fakture_do_ksef(
-        res_pathname=output, invoice_path=invoice_path)
+        output=output, invoice_path=invoice_path)
     print(res)
 
 
@@ -60,7 +60,19 @@ def test6():
     cli = KSEFCLI(C, nip)
     output = T.temp_ojosn()
     res = cli.wyslij_fakture_do_ksef(
-        res_pathname=output, invoice_path=invoice_path)
+        output=output, invoice_path=invoice_path)
+    print(res)
+
+
+def test7():
+    C = T.CO()
+    nip = T.NIP
+    fa = T.FAKTURA_WZORZEC
+    _ = T.prepare_invoice(fa)
+    tmp_dir = T.temp_dir()
+    cli = KSEFCLI(C, nip)
+    output = T.temp_ojosn()
+    res = cli.wyslij_wsadowo_do_ksef(output=output, faktury_dir=tmp_dir)
     print(res)
 
 
@@ -69,4 +81,5 @@ def test6():
 # test3()
 # test4()
 # test5()
-test6()
+# test6()
+test7()

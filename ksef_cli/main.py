@@ -8,6 +8,7 @@ ODCZYTAJ_UPO = "odczytaj_upo"
 POBIERZ_ZAKUPOWE = "pobierz_zakupowe"
 ODCZYTAJ_FAKTURE = "odczytaj_fakture"
 WYCZYSC_DANE = "wyczysc_dane"
+WYSLIJ_WSADOWO = "wyslij_wsadowo"
 
 HELP = "help"
 
@@ -16,7 +17,8 @@ _actions = {
     ODCZYTAJ_UPO: (3, KSEFCLI.wez_upo, ('ksef_number',)),
     POBIERZ_ZAKUPOWE: (4, KSEFCLI.czytaj_faktury_zakupowe, ('data_od', 'data_do')),
     ODCZYTAJ_FAKTURE: (3, KSEFCLI.wez_fakture, ('ksef_number',)),
-    WYCZYSC_DANE: (2, KSEFCLI.clean_nip_dir, ())
+    WYCZYSC_DANE: (2, KSEFCLI.clean_nip_dir, ()),
+    WYSLIJ_WSADOWO: (3, KSEFCLI.wyslij_wsadowo_do_ksef, ('faktury_dir',))
 }
 
 

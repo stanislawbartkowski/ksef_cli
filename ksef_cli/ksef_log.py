@@ -42,13 +42,15 @@ class E(_A):
     WYSLIJ_FAKTURE = 2
     WEZ_UPO = 3
     WEZ_FAKTURE = 4
+    WYSLIJ_WSADOWO = 5
 
     _d = {
         WYCZYSC_DANE: "Wyczyść dane robocze",
         CZYTANIE_FAKTUR_ZAKUPOWYCH: "Czytanie faktur zakupowych",
         WYSLIJ_FAKTURE: "Wyślij fakture do KSeF",
         WEZ_UPO: "Weź UPO",
-        WEZ_FAKTURE: "Weź fakturę z KSeF"
+        WEZ_FAKTURE: "Weź fakturę z KSeF",
+        WYSLIJ_WSADOWO: "Wyślij faktury wsadowo"
     }
 
     def __init__(self, C: CONF, nip: str, action: int, output: str | None):
@@ -76,7 +78,7 @@ class E(_A):
                 "a", "action:", "result", "errmess", "nip", "addinfo"]
         for f in self.C.get_events_file(), self.C.get_nip_events_file(self.nip):
             with open(f, 'a', newline='', encoding='utf-8') as f:
-                writer = csv.DictWriter(f, fieldnames=list)
+                writer = csv.DictWriter(f, fieldnames=list, delimiter="|")
                 if f.tell() == 0:
                     writer.writeheader()
                 writer.writerow(info)
