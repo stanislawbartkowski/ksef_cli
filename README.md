@@ -12,11 +12,13 @@ Dodatkowe cechy rozwiązania:
 
 Testowane dla wersji: 3.10, 3.11 i 3.12
 
+Testowane tylko w testowym środowisku KSeF 2.0. Nie było weryfikowane w pozostałych środowiskach.
+
 ## Konfiguracja
 
 Zmienne środowiskowe
 
-* KSEFCONF - plik zawierający listę dopuszczalnych NIPów oraz tokenów związanych z NIPami. Zawiera także definicje obsługiwanego środowiska KSeF 2.0 - deweloperskie/testowe, przedprodukcyjne/demo oraz produkcyjne.
+* KSEFCONF - plik zawierający listę dopuszczalnych NIPów oraz tokenów związanych z NIPami. Zawiera także definicje obsługiwanego środowiska KSeF 2.0 - deweloperskie/testowe, przedprodukcyjne oraz produkcyjne.
 * KSEFDIR - katalog na logi operacji
 
 ## Instalacja
