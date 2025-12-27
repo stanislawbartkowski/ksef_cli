@@ -89,7 +89,7 @@ Wywołanie:
 
 > python -m ksef_cli <akcja> \<nip\> <plik_na_wynik> <dodatkowe_parametry>
 
-akcja:
+akcja, dopuszczalne wartości:
 * wyslij_fakture Wysłanie faktury do system KSeF 2.0
 * odczytaj_upo Odczytaj plik UPO do wysłanej i zaakceptowanej faktury
 * pobierz_zakupowe Odczytaj nagłówki (metadata) faktur zakupowych
@@ -97,7 +97,7 @@ akcja:
 * wyslij_wsadowo Wysyła paczkę faktur w sesji wsadowej
 
 nip:
-* Numer NIP użytkownika KSeF 2.0. Numer NIP musi być zawarty w plik *KSEFCONF*
+* Numer NIP użytkownika KSeF 2.0. Numer NIP musi być zawarty w plik *KSEFCONF*. Z pliku konfiguracyjnego jest odczytywany odpowiedni token służący do autentykacji.
 
 plik_na_wynik:
 * Nazwa pliku gdzie będzie zapisany wynik akcji. Wynik jest zapisany w formacie JSON.
@@ -107,7 +107,8 @@ Plik zawiera zawsze dwa pola oraz dodatkowe pola zależne od akcji
 * errmess: Jeśli akcja zakończona niepowodzeniem, to informacja o błędzie
 
 Działanie:
-* Odczytuje NIP oraz wyszukuje NIP w pliku *KSEFCONF*
+* Odczytuje NIP oraz wyszukuje token w pliku *KSEFCONF*
+* Autentykacja z użyciem NIP oraz token
 * Wykonuje akcję na podstawie podanych patametrów
 * Uzupełnia dziennik oraz logging w katalogu *KSEFDIR*
 * Zapisuje plik *plik_na_wynik* w formacie JSON z wynikiem akcji
@@ -124,7 +125,7 @@ Wywołanie nie zwraca znaczącego *exit code*. Wynik akcji, także niepowodzenie
 Zwracana wartość w pliku *plik_na_wynik*
 * OK
 * errmess
-* numer_ksef Jeśli faktura jest zaakceptowana w systemie KSeF 2.0, to nadany przez KSeF numer
+* numer_ksef Jeśli faktura jest zaakceptowana w systemie KSeF 2.0, to nadany przez KSeF 2.0 numer
 
 ## wyslij_wsadowo
 [link](https://github.com/stanislawbartkowski/ksef_pyth/tree/main?tab=readme-ov-file#wys%C5%82anie-paczki-faktur-w-trybie-wsadowym)
