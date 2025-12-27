@@ -101,7 +101,7 @@ plik_na_wynik:
 * Nazwa pliku gdzie będzie zapisany wynik akcji. Wynik jest zapisany w formacie JSON.
 
 Plik zawiera zawsze dwa pola oraz dodatkowe pola zależne od akcji
-* OK: true/false Akcja zakońćzona sukcesem lub niepowodzeniem
+* OK: true/false Akcja zakończona sukcesem lub niepowodzeniem
 * errmess: Jeśli akcja zakończona niepowodzeniem, to informacja o błędzie
 
 Działanie:
@@ -185,7 +185,7 @@ Zwracana wartość w pliku *plik_na_wynik*
 ## Przykładowe wywołanie
 > export KSEFCONF=/ścieżka/ <br>
 > export KSEFDIR=/ścieżka/ <br>
-> export PYTHONPATH=$HOME/perseus/ksef_cli; python -m ksef_cli /parametry/ <br>
+> python -m ksef_cli /parametry/ <br>
 
 ## Dev environment, happy coding
 > source .venv/bin/activate<br>
