@@ -76,10 +76,16 @@ def test7():
     print(res)
 
 
+def test8():
+    C = T.CO_CERT()
+    odczytaj_tokny(C, "1234567")
+
+
 # test1()
 # test2()
 # test3()
 # test4()
 # test5()
 # test6()
-test7()
+# test7()
+test8()

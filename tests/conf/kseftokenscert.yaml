@@ -1,0 +1,18 @@
+tokens:
+
+  NIP7497725064:
+    env: test
+    password: "1234"
+    p12: keyStore.p12
+
+
+  NIP1234567:
+    env: test
+    password: "1234"
+
+  NIP7952809480:
+    token: 20251210-EC-49CD637000-C47EF8923C-D7|nip-7952809480|4dfe5e94a46a49f1846747dd3891e60a2912a922e90640eaaf44a64eee3971d5
+    env: test
+
+
+  

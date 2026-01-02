@@ -11,7 +11,19 @@ from ksef import KSEFSDK
 
 from .ksef_log import LOGGER, E
 from .ksef_conf import CONF
-from .ksef_tokens import odczytaj_tokny
+from .ksef_tokens import odczytaj_tokny, TOKEN, is_cert
+from .readp12 import read_cert
+
+
+def _daj_cert(conf_path: str, t: TOKEN) -> tuple[bytes, bytes]:
+    path_p12 = t.p12
+    password = t.password
+    head, tail = os.path.split(path_p12)
+    if head == "":
+        # ścieżka względna do pliku konfiguracyjnego
+        conf_dir = os.path.dirname(conf_path)
+        path_p12 = os.path.join(conf_dir, path_p12)
+    return read_cert(file_path=path_p12, password=password)
 
 
 class KSEFCLI(LOGGER):
@@ -22,7 +34,9 @@ class KSEFCLI(LOGGER):
             def wrapper(self, output: str, **kwargs):
                 EV = self.genE(action, output=output)
                 try:
-                    token = odczytaj_tokny(self.C, self.nip)
+                    self.logger.info(
+                        f"Czytanie konfiguracji z pliku {self.C.ksef_conf_path}")
+                    token: TOKEN = odczytaj_tokny(self.C, self.nip)
                 except Exception as e:
                     errmess = f"Nie można odczytać tokena KSeF dla NIP {self.nip}"
                     EV.koniec(res=False, errmess=errmess)
@@ -30,8 +44,15 @@ class KSEFCLI(LOGGER):
                     self.logger.exception(e)
                     return False, errmess
                 try:
-                    K = KSEFSDK.initsdk(
-                        env=token.env, nip=token.nip, token=token.token)
+                    if is_cert(token):
+                        key, cert = _daj_cert(self.C.ksef_conf_path, token)
+                        # autentykacja certyfikatem
+                        K = KSEFSDK.initsdkcert(
+                            env=token.env, nip=token.nip, p12pk=key, p12pc=cert)
+                    else:
+                        # autentykacja tokenem
+                        K = KSEFSDK.initsdk(
+                            env=token.env, nip=token.nip, token=token.token)
                     res_dict, mess = func(self, K, **kwargs)
                     K.session_terminate()
                     EV.koniec(res=True, errmess=mess, res_dict=res_dict)

@@ -134,7 +134,7 @@ class TestKsefCliMain(AKsefCli):
         return _run_main_res(argv, output)
 
 
-class AbstractTestKSEFCLI(unittest.TestCase):
+class TokenKsefCO(unittest.TestCase):
 
     # -------------
     # test fixture
@@ -142,6 +142,19 @@ class AbstractTestKSEFCLI(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.C = T.CO()
+
+
+class CertKsefCO(unittest.TestCase):
+
+    # -------------
+    # test fixture
+    # -------------
+    @classmethod
+    def setUpClass(cls):
+        cls.C = T.CO_CERT()
+
+
+class AbstractTestKSEFCLI(unittest.TestCase):
 
     # -----------------
     # abstract testy
@@ -162,10 +175,7 @@ class AbstractTestKSEFCLI(unittest.TestCase):
         print(msg)
 
     def _test_pobierz_faktury_zakupowe(self, A: AKsefCli):
-        d2 = datetime.datetime.now() + datetime.timedelta(days=2)
-        d1 = d2 - datetime.timedelta(days=7)
-        d_from = d1.strftime("%Y-%m-%d")
-        d_to = d2.strftime("%Y-%m-%d")
+        d_from, d_to = T.daj_przedzial()
         print(d_from, d_to)
         nip = T.NIP
         output = T.temp_ojosn()
@@ -292,7 +302,7 @@ class AbstractTestKSEFCLI(unittest.TestCase):
         self.assertTrue(res[0])
 
 
-class TestKSEFCli(AbstractTestKSEFCLI):
+class TestKSEFCli(TokenKsefCO, AbstractTestKSEFCLI):
 
     AT = TestKsefCli()
 
@@ -351,7 +361,37 @@ class TestKSEFCli(AbstractTestKSEFCLI):
         self._test_pobierz_faktury_zakupowe(self.AT)
 
 
-class TestKSEFCliMain(AbstractTestKSEFCLI):
+class TestKSEFCliCert(CertKsefCO, AbstractTestKSEFCLI):
+
+    AT = TestKsefCli()
+
+    # ------------
+    # test suite
+    # ------------
+
+    def test_wyslij_bledna_fakture(self):
+        self._test_wyslij_bledna_fakture(self.AT)
+
+    def test_wyslij_fakture_sprzedazy(self):
+        self._test_wyslij_fakture_sprzedazy(self.AT)
+
+    def test_wez_upo_nie_istnieje(self):
+        self._test_wez_upo_nie_istnieje(self.AT)
+
+    def test_wez_upo_dla_faktury(self):
+        self._test_wez_upo_dla_faktury(self.AT)
+
+    def test_faktura_zakupowa_blad(self):
+        self._test_faktura_zakupowa_blad(self.AT)
+
+    def test_faktura_zakupowa(self):
+        self._test_faktura_zakupowa(self.AT)
+
+    def test_pobierz_faktury_zakupowe(self):
+        self._test_pobierz_faktury_zakupowe(self.AT)
+
+
+class TestKSEFCliMain(TokenKsefCO, AbstractTestKSEFCLI):
 
     AM = TestKsefCliMain()
 
@@ -383,7 +423,7 @@ class TestKSEFCliMain(AbstractTestKSEFCLI):
         self._test_faktura_zakupowa(self.AM)
 
 
-class TestKSEFWsadowe(AbstractTestKSEFCLI):
+class TestKSEFWsadowe(TokenKsefCO, AbstractTestKSEFCLI):
 
     AW = TestWsadowoKsefCli()
 
@@ -403,7 +443,7 @@ class TestKSEFWsadowe(AbstractTestKSEFCLI):
         self._test_faktura_zakupowa(self.AW)
 
 
-class TestKSEFWsadowoMain(AbstractTestKSEFCLI):
+class TestKSEFWsadowoMain(TokenKsefCO, AbstractTestKSEFCLI):
 
     AW = TestWsadowoMainKsefCli()
 
@@ -436,7 +476,7 @@ class TestKSEFWsadowoDuzoFaktur(unittest.TestCase):
     # test suite
     # -------------
 
-    # wygląda, że w wersji testowej można maksymalnie wysłać 10 faktury
+    # wygląda, że w wersji testowej można maksymalnie wysłać 10 faktur
     NO = 10
 
     def _przygotuj_paczke(self):
@@ -478,11 +518,3 @@ class TestKSEFWsadowoDuzoFaktur(unittest.TestCase):
             with open(upo, "r") as f:
                 upo_xml = f.read()
                 et.fromstring(upo_xml)
-                
-
-                
-
-
-
-
-
