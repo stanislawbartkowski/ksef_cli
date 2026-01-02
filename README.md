@@ -55,7 +55,7 @@ Wartość tokena dostępowego dla NIP <br>
 Przykład: <br>
 NIP - 7497725064 <br>
 Środowisko testowe <br>
-Plik p12 z certyfikatami: keyStore.p12
+Plik p12 z certyfikatami: keyStore.p12<br>
 Hasło odczytu: 1234
 
 ```YAML
@@ -71,7 +71,7 @@ Testy były przeprowadzane tylko dla tylko dla testowych certyfikatów generowan
 
 Parametr p12 wskazuje na plik w formacie P12 zawierający wygenerowany klucz i certyfikat.
 
-Przykładowa komenda tworząca plik P12. Pliki CertyfikatKSEF zawierają wygenerowane certyfikaty.
+Przykładowa komenda tworząca plik P12. Pliki CertyfikatKSEF zawierają pliki utworzone przez KSeF 2.0
 
 > openssl pkcs12 -export -out keyStore.p12 -inkey CertyfikatKSEF.key  -in CertyfikatKSEF.crt
 
