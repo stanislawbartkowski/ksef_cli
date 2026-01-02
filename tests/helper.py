@@ -29,8 +29,19 @@ def _daj_dir() -> tuple[str, str]:
     return conf_path, _workdir()
 
 
+def _daj_dir_cert() -> tuple[str, str]:
+    conf_path = os.path.join(os.path.dirname(
+        __file__), 'conf', "kseftokenscert.yaml")
+    return conf_path, _workdir()
+
+
 def CO():
     conf_path, work_dir = _daj_dir()
+    return CONF(conf_path, work_dir)
+
+
+def CO_CERT():
+    conf_path, work_dir = _daj_dir_cert()
     return CONF(conf_path, work_dir)
 
 
@@ -101,3 +112,11 @@ def prepare_invoice(patt: str) -> str:
     temp_dir_remove_xml()
     outpath, _ = prepare_invoice_faktur(patt, "faktura.xml")
     return outpath
+
+
+def daj_przedzial() -> tuple[str, str]:
+    d2 = datetime.datetime.now() + datetime.timedelta(days=2)
+    d1 = d2 - datetime.timedelta(days=7)
+    d_from = d1.strftime("%Y-%m-%d")
+    d_to = d2.strftime("%Y-%m-%d")
+    return d_from, d_to
