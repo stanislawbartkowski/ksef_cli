@@ -39,7 +39,6 @@ tokens:
 
 ### Token
 
-
 Przykład: <br>
 NIP - 7497725064 <br>
 Wartość tokena dostępowego dla NIP <br>
@@ -52,8 +51,6 @@ Wartość tokena dostępowego dla NIP <br>
 ```
 
 ### Certyfikat
-
-Przykład: <br>
 
 Przykład: <br>
 NIP - 7497725064 <br>
