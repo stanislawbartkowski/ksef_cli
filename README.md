@@ -4,7 +4,7 @@ Jest to "command line" rozszerzenie rozwiązania: https://github.com/stanislawba
 
 Dodatkowe cechy rozwiązania:
 
-* Konfiguracja tokena (tokenów) z pliku tekstowego.
+* Konfiguracje metody autentykacji: token lub certyfikat na podstawie pliku konfiguracyjnego
 * Tworzenie dziennika i logów, historii wykonywanych operacji.
 * Możliwość wywołania funkcjonalności z poziomu bash lub bezpośrednio jako komenda python3
 
@@ -26,7 +26,7 @@ Zmienne środowiskowe
 > python<br>
 > import ksef_cli<br>
 
-## Konfiguracja NIP i token
+## Konfiguracja NIP oraz metody autentykacji
 
 Plik jest wskazywany przez zmienną środowiskową *KSEFCONF*. Jest to plik w formacie YAML.
 
@@ -36,6 +36,9 @@ tokens:
     token: {token dla NIP}
     env: prod|demo|test  (produkcyjne, demo, testowe)
 ```
+
+### Token
+
 
 Przykład: <br>
 NIP - 7497725064 <br>
@@ -47,6 +50,34 @@ Wartość tokena dostępowego dla NIP <br>
     token: 20251116-EC-0317C65000-2CA83C40D9-73|nip-7497725064|80be6cfced7f44eb860aeeb644e8cffdd59bbad9e218415296db90a39e6e5370
     env: test
 ```
+
+### Certyfikat
+
+Przykład: <br>
+
+Przykład: <br>
+NIP - 7497725064 <br>
+Środowisko testowe <br>
+Plik p12 z certyfikatami: keyStore.p12
+Hasło odczytu: 1234
+
+```YAML
+  NIP7497725064:
+    env: test
+    password: "1234"
+    p12: keyStore.p12
+```
+
+Dodatkowa informacja dotycząca certyfkatów.
+
+Testy były przeprowadzane tylko dla tylko dla testowych certyfikatów generowanych poprzez testowe środowisko KSeF 2.0
+
+Parametr p12 wskazuje na plik w formacie P12 zawierający wygenerowany klucz i certyfikat.
+
+Przykładowa komenda tworząca plik P12. Pliki CertyfikatKSEF zawierają wygenerowane certyfikaty.
+
+> openssl pkcs12 -export -out keyStore.p12 -inkey CertyfikatKSEF.key  -in CertyfikatKSEF.crt
+
 
 ## Struktura kodu w Python
 
