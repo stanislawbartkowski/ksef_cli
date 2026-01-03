@@ -87,15 +87,15 @@ Przykładowa komenda tworząca plik P12. Pliki CertyfikatKSEF zawierają pliki u
 
 ## Struktura katalogu z logami i dziennikiem
 
-Katalog jest wskazywany przez zmienną środowiskową *KSEFDIR*. Dane są logowane na poziomie wspólnym i na poziomie NIP. Dodatkowo każda wysłana faktura tworzy podakatalog z numerem KSeF nadanym po wysłaniu, gdzie zawarty jest odczytany plikm UPO oraz wysłana faktura.
+Katalog jest wskazywany przez zmienną środowiskową *KSEFDIR*. Dane są logowane na poziomie wspólnym i na poziomie NIP. Dodatkowo każda wysłana faktura tworzy podakatalog z numerem KSeF nadanym po wysłaniu, gdzie zawarty jest odczytany plik UPO oraz wysłana faktura. Zapamietywane są tylko faktury zaakceptowane w KSeF 2.0 i mające nadany numer KSeF.
 
 * KSEFDIR
-  * events.csv Plik z formacie tekstowym CSV z historią operacji. Pamiętane są operacje zakończone sukcesem oraz operacje które nie zostały wykonany z opisem błędu.
+  * events.csv Plik z formacie tekstowym CSV z historią operacji. Pamiętane są operacje zakończone sukcesem oraz operacje które nie zostały wykonane z opisem błędu.
   * ksef.log Zawiera dane logging z wykonywania
   * {nip}
     * events.csv Plik w formacie tekstowym CSV z historią operacji. Zawiera te same dane co plik event.csv w katalogu KSEFDIR, ale tylko dla danego NIP
     * ksef.log Zawiera dane logging z wykonywania, Zawiera te same dane co plik ksef.log w katalog KSEFDIR, ale tylko dla operacji związanych z danym NIP
-    * {ksef_number} Dla każdej wysłanej faktury z danego NIP
+    * {ksef_number} Dla każdej wysłanej i zaakceptowanej faktury z danego NIP
       * upo.xml Plik UPO
       * faktura.xml Wysłana faktura
 
@@ -135,13 +135,14 @@ Plik zawiera zawsze dwa pola oraz dodatkowe pola zależne od akcji
 * errmess: Jeśli akcja zakończona niepowodzeniem, to informacja o błędzie
 
 Działanie:
-* Odczytuje NIP oraz wyszukuje token w pliku *KSEFCONF*
-* Autentykacja z użyciem NIP oraz token
-* Wykonuje akcję na podstawie podanych patametrów
+* Odczytuje NIP oraz wyszukuje metodę autentykacji (token lub certyfikat) w pliku *KSEFCONF*
+* Autentykacja z użyciem NIP oraz poprzez token lub certyfikat
+* Wykonuje akcję na podstawie podanych paeametrów
 * Uzupełnia dziennik oraz logging w katalogu *KSEFDIR*
 * Zapisuje plik *plik_na_wynik* w formacie JSON z wynikiem akcji
 
 Dodatkowa uwaga:
+
 Wywołanie nie zwraca znaczącego *exit code*. Wynik akcji, także niepowodzenie, trzeba odczytać z pliku *plik_na_wynik*
 
 ## wyslij_fakture
