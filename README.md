@@ -214,6 +214,19 @@ Zwracana wartość w pliku *plik_na_wynik*
 * errmess
 * faktury Lista zawierająca odczytane nagłówki faktur zakupowych z podanego zakresu dat.
 
+## pobierz_sprzedazowe
+
+[link](https://github.com/stanislawbartkowski/ksef_pyth/tree/main?tab=readme-ov-file#odczytanie-nag%C5%82%C3%B3wk%C3%B3w-faktur-na-podstawie-dat)
+
+> python -m ksef_cli pobierz_sprzedazowe  \<nip\> <plik_na_wynik> <data_od> <data_do>
+
+Odczytuje faktury sprzedażowe w przedziale dat. Daty muszą być w formacie YYYY-MM-DD
+
+Zwracana wartość w pliku *plik_na_wynik*
+* OK
+* errmess
+* faktury Lista zawierająca odczytane nagłówki faktur sprzedażowych z podanego zakresu dat.
+
 ## Przykładowe wywołanie
 > export KSEFCONF=/ścieżka/ <br>
 > export KSEFDIR=/ścieżka/ <br>
