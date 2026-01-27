@@ -87,13 +87,20 @@ class KSEFCLI(LOGGER):
             shutil.rmtree(work_dir)
         EV.koniec(res=True, errmess="")
 
-    @ksef_action(action=E.CZYTANIE_FAKTUR_ZAKUPOWYCH)
-    def czytaj_faktury_zakupowe(self, K: KSEFSDK, data_od: str, data_do: str) -> tuple[dict, str]:
-        faktury_zakupowe = K.get_invoices_zakupowe_metadata(
-            date_from=data_od, date_to=data_do)
+    def _czytaj_faktury(self, K: KSEFSDK, data_od: str, data_do: str, subject: str) -> tuple[dict, str]:
+        faktury_zakupowe = K.get_invoices_metadata(
+            date_from=data_od, date_to=data_do, subject=subject)
         return {
             "faktury": faktury_zakupowe
         }, f"{data_od} - {data_do}"
+
+    @ksef_action(action=E.CZYTANIE_FAKTUR_ZAKUPOWYCH)
+    def czytaj_faktury_zakupowe(self, K: KSEFSDK, data_od: str, data_do: str) -> tuple[dict, str]:
+        return self._czytaj_faktury(K, data_od, data_do, subject=KSEFSDK.SUBJECT2)
+
+    @ksef_action(action=E.CZYTANIE_FAKTUR_SPRZEDAZY)
+    def czytaj_faktury_sprzedazy(self, K: KSEFSDK, data_od: str, data_do: str) -> tuple[dict, str]:
+        return self._czytaj_faktury(K, data_od, data_do, subject=KSEFSDK.SUBJECT1)
 
     def _zapisz_upo(self, ksef_numer: str, upo: str):
         upo_file = self.C.get_invoice_upo(self._nip, ksef_numer)
