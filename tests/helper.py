@@ -116,7 +116,7 @@ def prepare_invoice(patt: str) -> str:
 
 def daj_przedzial() -> tuple[str, str]:
     d2 = datetime.datetime.now() + datetime.timedelta(days=2)
-    d1 = d2 - datetime.timedelta(days=7)
+    d1 = d2 - datetime.timedelta(days=4)
     d_from = d1.strftime("%Y-%m-%d")
     d_to = d2.strftime("%Y-%m-%d")
     return d_from, d_to
