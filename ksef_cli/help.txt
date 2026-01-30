@@ -1,10 +1,13 @@
 Wywołanie:
   python -m ksef_cli <akcja> <nip> <plik_na_wynik> <dodatkowe_parametry>
 
+Wersja z dnia 30 stycznia 2026 rok.
+
 Akcje:
   wyslij_fakture Wysłanie faktury do system KSeF 2.0
   odczytaj_upo Odczytaj plik UPO do wysłanej i zaakceptowanej faktury
   pobierz_zakupowe Odczytaj nagłówki (metadata) faktur zakupowych
+  pobierz_sprzedazowe Odczytaj nagłówki (metadata) faktur sprzedażowych
   odczytaj_fakture Odczytaj fakturę na podstawie nadanego numeru KSeF
   wyczysc_dane Wyczyść lokalne dane dla NIPu (dla celów testowych)
   wyslij_wsadowo Wyślij paczkę faktur w trybie wsadowym
@@ -50,15 +53,17 @@ odczytaj_fakture
     invoice: plik z odczytaną fakturą w formacie XML
 
 pobierz_zakupowe
+pobierz_sprzedazowe
   python -m ksef_cli pobierz_zakupowe  <nip> <plik_na_wynik> <data_od> <data_do>
+  python -m ksef_cli pobierz_sprzedazowe  <nip> <plik_na_wynik> <data_od> <data_do>
 
-  data_od: Początkowa data faktur do oczytania w format YYYY-MM-DD
+  data_od: Początkowa data faktur do oczytania w formacie YYYY-MM-DD
   data_do: Data końcowa przedziału dat
 
   Zwraca w plik_na_wynik
     OK: true/false
     errmess
-    faktury: plik w formacie JSON z listą odczytanych nagłówków faktur zakupowych
+    faktury: plik w formacie JSON z listą odczytanych nagłówków faktur zakupowych lub sprzedażowych
 
 wyczysc_dane
   python -m ksef_cli pobierz_zakupoe  <nip> <plik_na_wynik> <data_od> <data_do>
