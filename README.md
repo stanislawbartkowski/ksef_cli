@@ -227,6 +227,19 @@ Zwracana wartość w pliku *plik_na_wynik*
 * errmess
 * faktury Lista zawierająca odczytane nagłówki faktur sprzedażowych z podanego zakresu dat.
 
+## pobierz_zbiorczo
+
+[link](https://github.com/stanislawbartkowski/ksef_pyth?tab=readme-ov-file#odczytanie-paczki-faktur)
+
+> python -m ksef_cli pobierz_zbiorczo  <nip> <plik_na_wynik> <data_od> <data_do> <subject>
+
+
+Zwraca w plik_na_wynik
+  OK: true/false
+  errmess
+  katalog: Katalog tymczasowy, gdzie znajdują się odczytane faktury lub None, jeśli nic nie odczytano
+  liczba_faktur: Liczba odczytanych faktur. Liczba może być 0, wówczas katalog jest None
+
 ## Przykładowe wywołanie
 > export KSEFCONF=/ścieżka/ <br>
 > export KSEFDIR=/ścieżka/ <br>
