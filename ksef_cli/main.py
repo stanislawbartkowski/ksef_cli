@@ -10,6 +10,7 @@ ODCZYTAJ_FAKTURE = "odczytaj_fakture"
 WYCZYSC_DANE = "wyczysc_dane"
 WYSLIJ_WSADOWO = "wyslij_wsadowo"
 POBIERZ_SPRZEDAZOWE = "pobierz_sprzedazowe"
+POBIERZ_ZBIORCZO = "pobierz_zbiorczo"
 
 HELP = "help"
 
@@ -21,6 +22,7 @@ _actions = {
     WYCZYSC_DANE: (2, KSEFCLI.clean_nip_dir, ()),
     WYSLIJ_WSADOWO: (3, KSEFCLI.wyslij_wsadowo_do_ksef, ('faktury_dir',)),
     POBIERZ_SPRZEDAZOWE: (4, KSEFCLI.czytaj_faktury_sprzedazy, ('data_od', 'data_do')),
+    POBIERZ_ZBIORCZO: (5, KSEFCLI.czytaj_faktury_zbiorczo, ('data_od', 'data_do','subject')),
 }
 
 

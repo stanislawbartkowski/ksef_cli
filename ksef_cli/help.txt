@@ -1,7 +1,7 @@
 Wywołanie:
   python -m ksef_cli <akcja> <nip> <plik_na_wynik> <dodatkowe_parametry>
 
-Wersja z dnia 30 stycznia 2026 rok.
+Wersja 1.0.1 z dnia 14 marca 2026 rok.
 
 Akcje:
   wyslij_fakture Wysłanie faktury do system KSeF 2.0
@@ -11,6 +11,7 @@ Akcje:
   odczytaj_fakture Odczytaj fakturę na podstawie nadanego numeru KSeF
   wyczysc_dane Wyczyść lokalne dane dla NIPu (dla celów testowych)
   wyslij_wsadowo Wyślij paczkę faktur w trybie wsadowym
+  pobierz_zbiorczo Odczytaj zbiorczo paczkę faktur
 
 Nip:
   Numer NIP użytkownika KSeF 2.0. NIP musi mieć odpowiednik z pliku konfiguracyjnym
@@ -67,4 +68,18 @@ pobierz_sprzedazowe
 
 wyczysc_dane
   python -m ksef_cli pobierz_zakupoe  <nip> <plik_na_wynik> <data_od> <data_do>
+
+pobierz_zbiorczo
+  python -m ksef_cli pobierz_zbiorczo  <nip> <plik_na_wynik> <data_od> <data_do> <subject>
+
+  data_od: Data początkowa paczki faktur w formacie YYYY-MM-DD
+  data_do: Data końcowa
+  subject: Subject1, Subject2
+
+  Zwraca w plik_na_wynik
+    OK: true/false
+    errmess
+    katalog: Katalog tymczasowy, gdzie znajdują się odczytane faktury lub None, jeśli nie odczytano
+    liczba_faktur: Liczba odczytanych faktur. Liczba może być 0, wówczas katalog jest None
+
 

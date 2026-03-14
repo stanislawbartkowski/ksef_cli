@@ -1,3 +1,4 @@
+import io
 import os
 import shutil
 import tempfile
@@ -18,7 +19,7 @@ from .readp12 import read_cert
 def _daj_cert(conf_path: str, t: TOKEN) -> tuple[bytes, bytes]:
     path_p12 = t.p12
     password = t.password
-    head, tail = os.path.split(path_p12)
+    head, _ = os.path.split(path_p12)
     if head == "":
         # ścieżka względna do pliku konfiguracyjnego
         conf_dir = os.path.dirname(conf_path)
@@ -166,6 +167,29 @@ class KSEFCLI(LOGGER):
             return {
                 "invoice": t.name
             }, ""
+
+    @ksef_action(action=E.CZYTANIE_FAKTUR_ZBIORCZO)
+    def czytaj_faktury_zbiorczo(self, K: KSEFSDK, data_od: str, data_do: str, subject: str) -> tuple[dict, str]:
+        liczba_faktur, zipped_dane = K.get_batch_invoices(
+            date_from=data_od, date_to=data_do, subject=subject)
+
+        def _wynik(dir_name: str | None) -> tuple[dict, str]:
+            mess = f"Znaleziono {liczba_faktur} faktur w okresie {data_od} - {data_do} dla subject {subject}"
+            return {
+                "katalog": dir_name,
+                "liczba_faktur": liczba_faktur
+            }, mess
+        if liczba_faktur == 0:
+            return _wynik(dir_name=None)
+        t = tempfile.mkdtemp()
+        dir_name = t
+        with zipfile.ZipFile(io.BytesIO(zipped_dane)) as z:
+            for name in z.namelist():
+                t_file = os.path.join(dir_name, name)
+                t_data = z.read(name)
+                with open(t_file, "wb") as t:
+                    t.write(t_data)
+        return _wynik(dir_name=dir_name)
 
     @ksef_action(action=E.WYSLIJ_WSADOWO)
     def wyslij_wsadowo_do_ksef(self, K: KSEFSDK, faktury_dir: str) -> tuple[dict, str]:

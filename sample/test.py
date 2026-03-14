@@ -81,6 +81,15 @@ def test8():
     odczytaj_tokny(C, "1234567")
 
 
+def test9():
+    C = T.CO_CERT()
+    nip = T.NIP
+    cli = KSEFCLI(C, nip)
+    res = cli.czytaj_faktury_zbiorczo(output=T.temp_ojosn(
+    ), data_od="2023-01-01", data_do="2023-12-31", subject="Subject1")
+    print(res)
+
+
 # test1()
 # test2()
 # test3()
@@ -88,4 +97,5 @@ def test8():
 # test5()
 # test6()
 # test7()
-test8()
+# test8()
+test9()
