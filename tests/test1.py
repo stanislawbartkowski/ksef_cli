@@ -259,7 +259,7 @@ class AbstractTestKSEFCLI(unittest.TestCase):
         # czy na pewno nip sprzedawcy
         self.assertEqual(T.NIP, seller)
 
-    def _test_wyslij_bledna_fakture(self, A: AKsefCli):
+    def _test_wyslij_bledna_fakture(self, A: AKsefCli, errmess_contains="Błąd"):
         nip = T.NIP
         fa = T.NIEPOPRAWNA_FAKTURA
         invoice_path = T.testdatadir(fa)
@@ -268,13 +268,13 @@ class AbstractTestKSEFCLI(unittest.TestCase):
                                nip=nip, invoice_path=invoice_path)
         print(res)
         self.assertFalse(res[0])
-        self.assertIn("Nieprawidłowy zakres uprawnień Kontekst", res[1])
+        self.assertIn(errmess_contains, res[1])
         # sprawdz, czy jest utworzony output
         with open(output, "r") as f:
             d = json.load(fp=f)
         print(d)
         self.assertFalse(d["OK"])
-        self.assertIn("Nieprawidłowy zakres uprawnień Kontekst", d["errmess"])
+        self.assertIn(errmess_contains, d["errmess"])
 
     def _test_wyslij_fakture_sprzedazy(self, A: AKsefCli):
         nip = T.NIP
@@ -493,7 +493,7 @@ class TestKSEFCli(TokenKsefCO, AbstractTestKSEFCLI):
         self._test_odczytaj_faktury_zakupowe_bledy_token(self.AT)
 
     def test_wyslij_bledna_fakture(self):
-        self._test_wyslij_bledna_fakture(self.AT)
+        self._test_wyslij_bledna_fakture(self.AT,errmess_contains="nie jest uprawniony do wystawienia faktury w imieniu")
 
     def test_wyslij_fakture_sprzedazy(self):
         self._test_wyslij_fakture_sprzedazy(self.AT)
@@ -540,7 +540,7 @@ class TestKSEFCliCert(CertKsefCO, AbstractTestKSEFCLI):
     # ------------
 
     def test_wyslij_bledna_fakture(self):
-        self._test_wyslij_bledna_fakture(self.AT)
+        self._test_wyslij_bledna_fakture(self.AT, errmess_contains= "Nieprawidłowy zakres uprawnień Kontekst")
 
     def test_wyslij_fakture_sprzedazy(self):
         self._test_wyslij_fakture_sprzedazy(self.AT)
@@ -575,7 +575,7 @@ class TestKSEFCliMain(TokenKsefCO, AbstractTestKSEFCLI):
         self._test_odczytaj_faktury_zakupowe_bledy_token(self.AM)
 
     def test_main_wyslij_bledna_fakture(self):
-        self._test_wyslij_bledna_fakture(self.AM)
+        self._test_wyslij_bledna_fakture(self.AM,errmess_contains="nie jest uprawniony do wystawienia faktury w imieniu")
 
     def test_main_pobierz_faktury_zakupowe(self):
         self._test_pobierz_faktury_zakupowe(self.AM)
