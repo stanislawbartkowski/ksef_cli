@@ -231,7 +231,7 @@ Zwracana wartość w pliku *plik_na_wynik*
 
 [link](https://github.com/stanislawbartkowski/ksef_pyth?tab=readme-ov-file#odczytanie-paczki-faktur)
 
-> python -m ksef_cli pobierz_zbiorczo  <nip> <plik_na_wynik> <data_od> <data_do> <subject>
+> python -m ksef_cli pobierz_zbiorczo  \<nip\> <plik_na_wynik> <data_od> <data_do> <subject>
 
 
 Zwraca w plik_na_wynik
