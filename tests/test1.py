@@ -1,7 +1,6 @@
-import datetime
-
 import json
 
+import os
 import unittest
 
 import xml.etree.ElementTree as et
@@ -50,6 +49,10 @@ class AKsefCli:
     def odczytaj_faktury_sprzedazy(C: CONF, output: str, nip: str, data_od: str, data_do: str) -> tuple[bool, str]:
         raise NotImplementedError
 
+    @staticmethod
+    def odczytaj_faktury_zbiorczo(C: CONF, output: str, nip: str, data_od: str, data_do: str, subject: str) -> tuple[bool, str]:
+        raise NotImplementedError
+
 
 class TestKsefCli(AKsefCli):
 
@@ -79,6 +82,12 @@ class TestKsefCli(AKsefCli):
         cli = KSEFCLI(C, nip)
         return cli.czytaj_faktury_sprzedazy(
             output=output, data_od=data_od, data_do=data_do)
+
+    @staticmethod
+    def odczytaj_faktury_zbiorczo(C: CONF, output: str, nip: str, data_od: str, data_do: str, subject: str) -> tuple[bool, str]:
+        cli = KSEFCLI(C, nip)
+        return cli.czytaj_faktury_zbiorczo(
+            output=output, data_od=data_od, data_do=data_do, subject=subject)
 
 
 def _wynik_wsadowo(output, ok, errmsg) -> tuple[bool, str]:
@@ -146,6 +155,11 @@ class TestKsefCliMain(AKsefCli):
     @staticmethod
     def odczytaj_faktury_sprzedazy(C: CONF, output: str, nip: str, data_od: str, data_do: str) -> tuple[bool, str]:
         argv = ["", "pobierz_sprzedazowe", nip, output, data_od, data_do]
+        return _run_main_res(argv, output)
+    
+    @staticmethod
+    def odczytaj_faktury_zbiorczo(C: CONF, output: str, nip: str, data_od: str, data_do: str, subject: str) -> tuple[bool, str]:
+        argv = ["", "pobierz_zbiorczo", nip, output, data_od, data_do, subject]
         return _run_main_res(argv, output)
 
 
@@ -254,13 +268,13 @@ class AbstractTestKSEFCLI(unittest.TestCase):
                                nip=nip, invoice_path=invoice_path)
         print(res)
         self.assertFalse(res[0])
-        self.assertIn("Błąd", res[1])
+        self.assertIn("Nieprawidłowy zakres uprawnień Kontekst", res[1])
         # sprawdz, czy jest utworzony output
         with open(output, "r") as f:
             d = json.load(fp=f)
         print(d)
         self.assertFalse(d["OK"])
-        self.assertIn("Błąd", d["errmess"])
+        self.assertIn("Nieprawidłowy zakres uprawnień Kontekst", d["errmess"])
 
     def _test_wyslij_fakture_sprzedazy(self, A: AKsefCli):
         nip = T.NIP
@@ -341,6 +355,105 @@ class AbstractTestKSEFCLI(unittest.TestCase):
         # tutaj jest błąd, gdy próba wystawienia faktury w cudzym imieniu
         self.assertTrue(res[0])
 
+    def _test_faktury_czytaj_zbiorcz_za_duzy_zakres(self, A: AKsefCli):
+        nip = T.NIP_NABYWCA
+        output = T.temp_ojosn()
+        date_from = "2023-01-01"
+        date_to = "2024-12-31"
+        subject = "Subject1"
+        res = A.odczytaj_faktury_zbiorczo(
+            C=self.C, output=output, nip=nip, data_od=date_from, data_do=date_to, subject=subject)
+        print(res)
+        # tutaj jest błąd, za duży zakres dat
+        self.assertFalse(res[0])
+        self.assertIn("must not exceed 3 months", res[1])
+
+    def _test_faktury_czytaj_zbiorczo_brak_faktur(self, A: AKsefCli):
+        nip = T.NIP_NABYWCA
+        output = T.temp_ojosn()
+        date_from = "2025-01-01"
+        date_to = "2025-01-31"
+        subject = "Subject1"
+        res = A.odczytaj_faktury_zbiorczo(
+            C=self.C, output=output, nip=nip, data_od=date_from, data_do=date_to, subject=subject)
+        print(res)
+        # brak faktur, ale OK
+        self.assertTrue(res[0])
+        d = _wez_res(output)
+        print(d)
+        liczba_faktur = d["liczba_faktur"]
+        self.assertEqual(0, liczba_faktur)
+
+    def _test_faktury_czytaj_zbiorczo_duzo_faktur(self, A: AKsefCli):
+        nip = T.NIP_NABYWCA
+        output = T.temp_ojosn()
+        date_from = "2025-12-01"
+        date_to = "2025-12-31"
+        subject = "Subject1"
+        res = A.odczytaj_faktury_zbiorczo(
+            C=self.C, output=output, nip=nip, data_od=date_from, data_do=date_to, subject=subject)
+        print(res)
+        # brak faktur, ale OK
+        self.assertTrue(res[0])
+        d = _wez_res(output)
+        print(d)
+        liczba_faktur = d["liczba_faktur"]
+        self.assertLess(0, liczba_faktur)
+        katalog = d["katalog"]
+        self.assertTrue(os.path.exists(katalog))
+        # sprawdz, czy jest tam faktura
+        faktury = os.listdir(katalog)
+        is_metadata = False
+        for f in faktury:
+            f_path = os.path.join(katalog, f)
+            print(f_path)
+            with open(f_path, "r") as f:
+                _ = f.read()
+            if f_path.endswith("_metadata.json"):
+                is_metadata = True
+        self.assertTrue(is_metadata)
+
+    def _test_faktury_wyslij_i_czytaj_zbiorczo(self, A: AKsefCli):
+        nip = T.NIP_NABYWCA
+        fa = T.FAKTURA_ZAKUP
+        invoice_path = T.prepare_invoice(fa)
+        output = T.temp_ojosn()
+        res = A.wyslij_fakture(C=self.C, output=output,
+                               nip=nip, invoice_path=invoice_path)
+        print(res)
+        self.assertTrue(res[0])
+        d = _wez_res(output)
+        print(d)
+        numer_ksef = d["numer_ksef"]
+        # teraz odczytaj zbiorczo
+        date_from, date_to = T.daj_przedzial()
+        subject = "Subject1"
+        res = A.odczytaj_faktury_zbiorczo(
+            C=self.C, output=output, nip=nip, data_od=date_from, data_do=date_to, subject=subject)
+        print(res)
+        self.assertTrue(res[0])
+        d = _wez_res(output)
+        print(d)
+        liczba_faktur = d["liczba_faktur"]
+        self.assertLess(0, liczba_faktur)
+        katalog = d["katalog"]
+        self.assertTrue(os.path.exists(katalog))
+        # sprawdz, czy jest tam faktura
+        faktury = os.listdir(katalog)
+        is_metadata = False
+        is_faktura_ksef = False
+        for f in faktury:
+            f_path = os.path.join(katalog, f)
+            print(f_path)
+            with open(f_path, "r") as f:
+                _ = f.read()
+            if f_path.endswith("_metadata.json"):
+                is_metadata = True
+            if numer_ksef in f_path:
+                is_faktura_ksef = True
+        self.assertTrue(is_faktura_ksef)
+        self.assertTrue(is_metadata)
+
 
 class TestKSEFCli(TokenKsefCO, AbstractTestKSEFCLI):
 
@@ -402,6 +515,20 @@ class TestKSEFCli(TokenKsefCO, AbstractTestKSEFCLI):
 
     def test_pobierz_faktury_sprzedazy(self):
         self._test_pobierz_faktury_sprzedazy(self.AT)
+
+    # -------------------------------
+
+    def test_faktury_czytaj_zbiorcz_za_duzy_zakres(self):
+        self._test_faktury_czytaj_zbiorcz_za_duzy_zakres(self.AT)
+
+    def test_faktury_czytaj_zbiorczo_brak_faktur(self):
+        return super()._test_faktury_czytaj_zbiorczo_brak_faktur(self.AT)
+
+    def test_faktury_czytaj_zbiorczo_duzo_faktur(self):
+        return super()._test_faktury_czytaj_zbiorczo_duzo_faktur(self.AT)
+
+    def test_faktury_wyslij_i_czytaj_zbiorczo(self):
+        return super()._test_faktury_wyslij_i_czytaj_zbiorczo(self.AT)
 
 
 class TestKSEFCliCert(CertKsefCO, AbstractTestKSEFCLI):
@@ -470,6 +597,18 @@ class TestKSEFCliMain(TokenKsefCO, AbstractTestKSEFCLI):
 
     def test_pobierz_faktury_sprzedazy(self):
         self._test_pobierz_faktury_sprzedazy(self.AM)
+
+    def test_faktury_czytaj_zbiorcz_za_duzy_zakres(self):
+        self._test_faktury_czytaj_zbiorcz_za_duzy_zakres(self.AM)
+
+    def test_faktury_czytaj_zbiorczo_brak_faktur(self):
+        return super()._test_faktury_czytaj_zbiorczo_brak_faktur(self.AM)
+
+    def test_faktury_czytaj_zbiorczo_duzo_faktur(self):
+        return super()._test_faktury_czytaj_zbiorczo_duzo_faktur(self.AM)
+
+    def test_faktury_wyslij_i_czytaj_zbiorczo(self):
+        return super()._test_faktury_wyslij_i_czytaj_zbiorczo(self.AM)
 
 
 class TestKSEFWsadowe(TokenKsefCO, AbstractTestKSEFCLI):
