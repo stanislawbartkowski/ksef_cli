@@ -235,10 +235,10 @@ Zwracana wartość w pliku *plik_na_wynik*
 
 
 Zwraca w plik_na_wynik
-  OK: true/false
-  errmess
-  katalog: Katalog tymczasowy, gdzie znajdują się odczytane faktury lub None, jeśli nic nie odczytano
-  liczba_faktur: Liczba odczytanych faktur. Liczba może być 0, wówczas katalog jest None
+  * OK: true/false
+  * errmess
+  * katalog: Katalog tymczasowy, gdzie znajdują się odczytane faktury lub None, jeśli nic nie odczytano
+  * liczba_faktur: Liczba odczytanych faktur. Liczba może być 0, wówczas katalog jest None
 
 ## Przykładowe wywołanie
 > export KSEFCONF=/ścieżka/ <br>
