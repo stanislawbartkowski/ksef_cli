@@ -4,14 +4,14 @@ from datetime import datetime
 import csv
 import json
 
-from .ksef_conf import CONF
+from .ksef_conf import CONF, NIP
 
 
 def _toiso_str(t: float) -> str:
     return datetime.fromtimestamp(t).isoformat()
 
 
-def _def_logger(C: CONF, nip: str):
+def _def_logger(C: CONF, nip: NIP):
     format_st = "%(asctime)s %(message)s"
     formatter = logging.Formatter(fmt=format_st, datefmt="%Y-%m-%d %H:%M:%S")
     logging.basicConfig(level=logging.INFO, format=format_st)
@@ -24,12 +24,12 @@ def _def_logger(C: CONF, nip: str):
 class _A:
     def __init__(self, C: CONF, nip: str):
         self._C = C
-        self._nip = nip
+        self._nip = NIP(nip)
 
     @property
-    def nip(self) -> str:
+    def nip(self) -> NIP:
         return self._nip
-
+    
     @property
     def C(self) -> CONF:
         return self._C
@@ -101,11 +101,11 @@ class LOGGER(_A):
 
     def __init__(self, C: CONF, nip: str):
         super(LOGGER, self).__init__(C, nip)
-        _def_logger(C, nip)
+        _def_logger(C, self.nip)
         self._logger = logging.getLogger(__name__)
 
     def genE(self, action: int, output: str | None) -> E:
-        return E(self.C, nip=self.nip, action=action, output=output)
+        return E(self.C, nip=self.nip.nip, action=action, output=output)
 
     @property
     def logger(self):

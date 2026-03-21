@@ -11,7 +11,7 @@ import zipfile
 from ksef import KSEFSDK
 
 from .ksef_log import LOGGER, E
-from .ksef_conf import CONF
+from .ksef_conf import CONF, NIP
 from .ksef_tokens import odczytaj_tokny, TOKEN, is_cert
 from .readp12 import read_cert
 
@@ -37,9 +37,10 @@ class KSEFCLI(LOGGER):
                 try:
                     self.logger.info(
                         f"Czytanie konfiguracji z pliku {self.C.ksef_conf_path}")
-                    token: TOKEN = odczytaj_tokny(self.C, self.nip)
+                    nip: NIP = self.nip
+                    token: TOKEN = odczytaj_tokny(self.C, nip.nip)
                 except Exception as e:
-                    errmess = f"Nie można odczytać tokena KSeF dla NIP {self.nip}"
+                    errmess = f"Nie można odczytać tokena KSeF dla NIP {nip.nip}"
                     EV.koniec(res=False, errmess=errmess)
                     self.logger.error(errmess)
                     self.logger.exception(e)
