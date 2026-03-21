@@ -1,2 +1,6 @@
-### Wersja 1.1.0  Data: 2026/03/13
+## Wersja 1.1.1 Data: 2026/03/21
+* Możliwość kwalifikacji symbolu NIP podkatalogiem
+* wez_konfiguracje, sprawdzenie, czy NIP jest skonfigurowany do komunikacji z systemem KSeF 2.0
+
+## Wersja 1.1.0  Data: 2026/03/13
 * Dodanie exportu paczki faktury /invoices/exports, pobierz_zbiorczo
