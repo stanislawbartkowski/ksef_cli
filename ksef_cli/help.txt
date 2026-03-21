@@ -89,4 +89,4 @@ daj_konfiguracje
     OK: true/false
     errmess
     auth: Metoda authentykcji, token lub certyfikat
-    mess: Komunikat, jest lub nie jest skonfigurowany
+    mess: Komunikat, NIP jest lub nie jest skonfigurowany
