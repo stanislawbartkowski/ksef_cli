@@ -7,7 +7,10 @@ from xml_konwerter import konwertujdok
 
 NIP = "7497725064"
 
+NIPDIR = "7497725064$YYYYYY"
+
 NIP_NABYWCA = "7952809480"
+NIP_NABYWCADIR = "7952809480$ZZZZZZ"
 
 NIEPOPRAWNA_FAKTURA = "FA_3_Przykład_9_niepoprawna.xml"
 FAKTURA_WZORZEC = "FA_3_Przykład_9_pattern.xml"

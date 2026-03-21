@@ -6,7 +6,7 @@ import unittest
 import xml.etree.ElementTree as et
 
 from ksef_cli import KSEFCLI
-from ksef_cli.ksef_conf import CONF
+from ksef_cli.ksef_conf import CONF, NIP
 from ksef_cli.ksef_tokens import odczytaj_tokny
 from ksef_cli.main import run_main
 
@@ -53,6 +53,10 @@ class AKsefCli:
     def odczytaj_faktury_zbiorczo(C: CONF, output: str, nip: str, data_od: str, data_do: str, subject: str) -> tuple[bool, str]:
         raise NotImplementedError
 
+    @staticmethod
+    def daj_konfiguracje(C: CONF, output: str, nip: str) -> tuple[bool, str]:
+        raise NotImplementedError
+
 
 class TestKsefCli(AKsefCli):
 
@@ -88,6 +92,11 @@ class TestKsefCli(AKsefCli):
         cli = KSEFCLI(C, nip)
         return cli.czytaj_faktury_zbiorczo(
             output=output, data_od=data_od, data_do=data_do, subject=subject)
+
+    @staticmethod
+    def daj_konfiguracje(C: CONF, output: str, nip: str) -> tuple[bool, str]:
+        cli = KSEFCLI(C, nip)
+        return cli.daj_konfiguracje(output=output)
 
 
 def _wynik_wsadowo(output, ok, errmsg) -> tuple[bool, str]:
@@ -156,10 +165,15 @@ class TestKsefCliMain(AKsefCli):
     def odczytaj_faktury_sprzedazy(C: CONF, output: str, nip: str, data_od: str, data_do: str) -> tuple[bool, str]:
         argv = ["", "pobierz_sprzedazowe", nip, output, data_od, data_do]
         return _run_main_res(argv, output)
-    
+
     @staticmethod
     def odczytaj_faktury_zbiorczo(C: CONF, output: str, nip: str, data_od: str, data_do: str, subject: str) -> tuple[bool, str]:
         argv = ["", "pobierz_zbiorczo", nip, output, data_od, data_do, subject]
+        return _run_main_res(argv, output)
+
+    @staticmethod
+    def daj_konfiguracje(C: CONF, output: str, nip: str) -> tuple[bool, str]:
+        argv = ["", "daj_konfiguracje", nip, output]
         return _run_main_res(argv, output)
 
 
@@ -203,10 +217,9 @@ class AbstractTestKSEFCLI(unittest.TestCase):
         self.assertFalse(res)
         print(msg)
 
-    def _test_pobierz_faktury_zakupowe(self, A: AKsefCli):
+    def _test_pobierz_faktury_zakupowe(self, A: AKsefCli, nip=T.NIP):
         d_from, d_to = T.daj_przedzial()
         print(d_from, d_to)
-        nip = T.NIP
         output = T.temp_ojosn()
         res = A.odczytaj_faktury_zakupowe(
             C=self.C, output=output, nip=nip, data_od=d_from, data_do=d_to)
@@ -276,8 +289,7 @@ class AbstractTestKSEFCLI(unittest.TestCase):
         self.assertFalse(d["OK"])
         self.assertIn(errmess_contains, d["errmess"])
 
-    def _test_wyslij_fakture_sprzedazy(self, A: AKsefCli):
-        nip = T.NIP
+    def _test_wyslij_fakture_sprzedazy(self, A: AKsefCli, nip=T.NIP):
         fa = T.FAKTURA_WZORZEC
         invoice_path = T.prepare_invoice(fa)
         cli = KSEFCLI(self.C, nip)
@@ -293,7 +305,7 @@ class AbstractTestKSEFCLI(unittest.TestCase):
         f_ksef = d["numer_ksef"]
         print(f_ksef)
         # sprawdz, czy odczytane upo
-        upo = self.C.get_invoice_upo(nip, f_ksef)
+        upo = self.C.get_invoice_upo(NIP(nip), f_ksef)
         with open(upo, "r") as f:
             upo_xml = f.read()
             et.fromstring(upo_xml)
@@ -309,8 +321,8 @@ class AbstractTestKSEFCLI(unittest.TestCase):
         print(d)
         self.assertFalse(d["OK"])
 
-    def _test_wez_upo_dla_faktury(self, A: AKsefCli):
-        _, f_ksef, nip = self._test_wyslij_fakture_sprzedazy(A)
+    def _test_wez_upo_dla_faktury(self, A: AKsefCli, nip=T.NIP):
+        _, f_ksef, nip = self._test_wyslij_fakture_sprzedazy(A, nip=nip)
         # teraz wez upo
         output = T.temp_ojosn()
         res = A.wez_upo(C=self.C, output=output, nip=nip, ksef_numer=f_ksef)
@@ -342,8 +354,7 @@ class AbstractTestKSEFCLI(unittest.TestCase):
             self.assertIn(
                 "nie jest uprawniony do wystawienia faktury w imieniu", errmess)
 
-    def _test_faktura_zakupowa(self, A: AKsefCli):
-        nip = T.NIP_NABYWCA
+    def _test_faktura_zakupowa(self, A: AKsefCli, nip=T.NIP_NABYWCA):
         fa = T.FAKTURA_ZAKUP
         # faktura, z zamienionym nipem nabywcy i sprzedawcy
         # NIP - nabywca, NIP_NABYWCA - sprzedawca
@@ -413,8 +424,7 @@ class AbstractTestKSEFCLI(unittest.TestCase):
                 is_metadata = True
         self.assertTrue(is_metadata)
 
-    def _test_faktury_wyslij_i_czytaj_zbiorczo(self, A: AKsefCli):
-        nip = T.NIP_NABYWCA
+    def _test_faktury_wyslij_i_czytaj_zbiorczo(self, A: AKsefCli, nip=T.NIP_NABYWCA):
         fa = T.FAKTURA_ZAKUP
         invoice_path = T.prepare_invoice(fa)
         output = T.temp_ojosn()
@@ -453,6 +463,21 @@ class AbstractTestKSEFCLI(unittest.TestCase):
                 is_faktura_ksef = True
         self.assertTrue(is_faktura_ksef)
         self.assertTrue(is_metadata)
+
+    def _test_sprawdz_konfiguracje(self, A: AKsefCli):
+        nip = T.NIP_NABYWCA
+        output = T.temp_ojosn()
+        res = A.daj_konfiguracje(C=self.C, output=output, nip=nip)
+        print(res)
+        self.assertTrue(res[0])
+
+        res = A.daj_konfiguracje(C=self.C, output=output, nip=T.NIPDIR)
+        print(res)
+        self.assertTrue(res[0])
+
+        res = A.daj_konfiguracje(C=self.C, output=output, nip="XXXX")
+        print(res)
+        self.assertFalse(res[0])
 
 
 class TestKSEFCli(TokenKsefCO, AbstractTestKSEFCLI):
@@ -493,7 +518,8 @@ class TestKSEFCli(TokenKsefCO, AbstractTestKSEFCLI):
         self._test_odczytaj_faktury_zakupowe_bledy_token(self.AT)
 
     def test_wyslij_bledna_fakture(self):
-        self._test_wyslij_bledna_fakture(self.AT,errmess_contains="nie jest uprawniony do wystawienia faktury w imieniu")
+        self._test_wyslij_bledna_fakture(
+            self.AT, errmess_contains="nie jest uprawniony do wystawienia faktury w imieniu")
 
     def test_wyslij_fakture_sprzedazy(self):
         self._test_wyslij_fakture_sprzedazy(self.AT)
@@ -530,6 +556,9 @@ class TestKSEFCli(TokenKsefCO, AbstractTestKSEFCLI):
     def test_faktury_wyslij_i_czytaj_zbiorczo(self):
         return super()._test_faktury_wyslij_i_czytaj_zbiorczo(self.AT)
 
+    def test_sprawdz_konfiguracje(self):
+        self._test_sprawdz_konfiguracje(self.AT)
+
 
 class TestKSEFCliCert(CertKsefCO, AbstractTestKSEFCLI):
 
@@ -540,7 +569,8 @@ class TestKSEFCliCert(CertKsefCO, AbstractTestKSEFCLI):
     # ------------
 
     def test_wyslij_bledna_fakture(self):
-        self._test_wyslij_bledna_fakture(self.AT, errmess_contains= "Nieprawidłowy zakres uprawnień Kontekst")
+        self._test_wyslij_bledna_fakture(
+            self.AT, errmess_contains="Nieprawidłowy zakres uprawnień Kontekst")
 
     def test_wyslij_fakture_sprzedazy(self):
         self._test_wyslij_fakture_sprzedazy(self.AT)
@@ -564,6 +594,26 @@ class TestKSEFCliCert(CertKsefCO, AbstractTestKSEFCLI):
         self._test_pobierz_faktury_sprzedazy(self.AT)
 
 
+class TestKSEFCliCertNIPDIR(CertKsefCO, AbstractTestKSEFCLI):
+
+    AT = TestKsefCli()
+
+    def test_wyslij_fakture_sprzedazy(self):
+        self._test_wyslij_fakture_sprzedazy(self.AT, nip=T.NIPDIR)
+
+    def test_wez_upo_dla_faktury(self):
+        self._test_wez_upo_dla_faktury(self.AT, nip=T.NIPDIR)
+
+    def test_faktura_zakupowa(self):
+        self._test_faktura_zakupowa(self.AT, nip=T.NIP_NABYWCADIR)
+
+    def test_pobierz_faktury_zakupowe(self):
+        self._test_pobierz_faktury_zakupowe(self.AT, nip=T.NIPDIR)
+
+    def test_faktury_wyslij_i_czytaj_zbiorczo(self):
+        return super()._test_faktury_wyslij_i_czytaj_zbiorczo(self.AT, nip=T.NIP_NABYWCADIR)
+
+
 class TestKSEFCliMain(TokenKsefCO, AbstractTestKSEFCLI):
 
     AM = TestKsefCliMain()
@@ -575,7 +625,8 @@ class TestKSEFCliMain(TokenKsefCO, AbstractTestKSEFCLI):
         self._test_odczytaj_faktury_zakupowe_bledy_token(self.AM)
 
     def test_main_wyslij_bledna_fakture(self):
-        self._test_wyslij_bledna_fakture(self.AM,errmess_contains="nie jest uprawniony do wystawienia faktury w imieniu")
+        self._test_wyslij_bledna_fakture(
+            self.AM, errmess_contains="nie jest uprawniony do wystawienia faktury w imieniu")
 
     def test_main_pobierz_faktury_zakupowe(self):
         self._test_pobierz_faktury_zakupowe(self.AM)
@@ -609,6 +660,9 @@ class TestKSEFCliMain(TokenKsefCO, AbstractTestKSEFCLI):
 
     def test_faktury_wyslij_i_czytaj_zbiorczo(self):
         return super()._test_faktury_wyslij_i_czytaj_zbiorczo(self.AM)
+
+    def test_sprawdz_konfiguracje(self):
+        self._test_sprawdz_konfiguracje(self.AM)
 
 
 class TestKSEFWsadowe(TokenKsefCO, AbstractTestKSEFCLI):

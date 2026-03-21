@@ -4,14 +4,14 @@ from datetime import datetime
 import csv
 import json
 
-from .ksef_conf import CONF
+from .ksef_conf import CONF, NIP
 
 
 def _toiso_str(t: float) -> str:
     return datetime.fromtimestamp(t).isoformat()
 
 
-def _def_logger(C: CONF, nip: str):
+def _def_logger(C: CONF, nip: NIP):
     format_st = "%(asctime)s %(message)s"
     formatter = logging.Formatter(fmt=format_st, datefmt="%Y-%m-%d %H:%M:%S")
     logging.basicConfig(level=logging.INFO, format=format_st)
@@ -24,10 +24,10 @@ def _def_logger(C: CONF, nip: str):
 class _A:
     def __init__(self, C: CONF, nip: str):
         self._C = C
-        self._nip = nip
+        self._nip = NIP(nip)
 
     @property
-    def nip(self) -> str:
+    def nip(self) -> NIP:
         return self._nip
 
     @property
@@ -63,6 +63,18 @@ class E(_A):
         self._start_time = time.time()
         self._output = output
 
+    @staticmethod
+    def zapisz_res(output: str | None, res: bool, errmess: str|None, res_dict: dict):
+        if output is not None:
+            # zapisz output
+            res_output = {
+                "OK": res,
+                "errmess": errmess,
+            }
+            res_output.update(res_dict)
+            with open(output, "w") as f:
+                json.dump(res_output, f)
+
     def koniec(self, res: bool, errmess: str, res_dict=None):
         res_dict = res_dict or {}
         end_time = time.time()
@@ -86,26 +98,18 @@ class E(_A):
                 if f.tell() == 0:
                     writer.writeheader()
                 writer.writerow(info)
-        if self._output is not None:
-            # zapisz output
-            res_output = {
-                "OK": res,
-                "errmess": errmess,
-            }
-            res_output.update(res_dict)
-            with open(self._output, "w") as f:
-                json.dump(res_output, f)
+        E.zapisz_res(self._output, res=res, errmess=errmess, res_dict=res_dict)
 
 
 class LOGGER(_A):
 
     def __init__(self, C: CONF, nip: str):
         super(LOGGER, self).__init__(C, nip)
-        _def_logger(C, nip)
+        _def_logger(C, self.nip)
         self._logger = logging.getLogger(__name__)
 
     def genE(self, action: int, output: str | None) -> E:
-        return E(self.C, nip=self.nip, action=action, output=output)
+        return E(self.C, nip=self.nip.nip, action=action, output=output)
 
     @property
     def logger(self):

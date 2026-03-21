@@ -90,6 +90,14 @@ def test9():
     print(res)
 
 
+def test10():
+    C = T.CO_CERT()
+    nip = T.NIP
+    cli = KSEFCLI(C, nip)
+    res = cli.daj_konfiguracje(output=T.temp_ojosn())
+    print(res)
+
+
 # test1()
 # test2()
 # test3()
@@ -98,4 +106,5 @@ def test9():
 # test6()
 # test7()
 # test8()
-test9()
+#test9()
+test10()

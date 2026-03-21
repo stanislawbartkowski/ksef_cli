@@ -1,4 +1,5 @@
 import io
+import json
 import os
 import shutil
 import tempfile
@@ -11,7 +12,7 @@ import zipfile
 from ksef import KSEFSDK
 
 from .ksef_log import LOGGER, E
-from .ksef_conf import CONF
+from .ksef_conf import CONF, NIP
 from .ksef_tokens import odczytaj_tokny, TOKEN, is_cert
 from .readp12 import read_cert
 
@@ -37,9 +38,10 @@ class KSEFCLI(LOGGER):
                 try:
                     self.logger.info(
                         f"Czytanie konfiguracji z pliku {self.C.ksef_conf_path}")
-                    token: TOKEN = odczytaj_tokny(self.C, self.nip)
+                    nip: NIP = self.nip
+                    token: TOKEN = odczytaj_tokny(self.C, nip.nip)
                 except Exception as e:
-                    errmess = f"Nie można odczytać tokena KSeF dla NIP {self.nip}"
+                    errmess = f"Nie można odczytać tokena KSeF dla NIP {nip.nip}"
                     EV.koniec(res=False, errmess=errmess)
                     self.logger.error(errmess)
                     self.logger.exception(e)
@@ -243,3 +245,25 @@ class KSEFCLI(LOGGER):
         return {
             "invoices": d_invoices
         }, msg
+
+    def daj_konfiguracje(self, output: str):
+        errmess = None
+        auth = "token"
+        nip: NIP = self.nip
+        ok: bool = True
+        mess = "Skonfigurowane"
+        try:
+            token: TOKEN = odczytaj_tokny(self.C, nip.nip)
+            if token.p12 is not None:
+                auth = "certyfikat"
+        except Exception as e:
+            errmess = f"Połącznie z KSeF 2.0 nie jest skonfigurawane dla {nip.nip}"
+            mess = "Nie jest skonfigurowane"
+            self.logger.warning(errmess, e)
+            ok = False
+        res = {
+            "auth": auth,
+            "mess": mess
+        }
+        E.zapisz_res(output, res=ok, errmess=errmess, res_dict=res)
+        return ok, mess
