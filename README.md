@@ -65,7 +65,7 @@ Hasło odczytu: 1234
     p12: keyStore.p12
 ```
 
-Dodatkowa informacja dotycząca certyfkatów.
+Dodatkowa informacja dotycząca certyfikatów.
 
 Testy były przeprowadzane tylko dla tylko dla testowych certyfikatów generowanych poprzez testowe środowisko KSeF 2.0
 
@@ -75,6 +75,16 @@ Przykładowa komenda tworząca plik P12. Pliki CertyfikatKSEF zawierają pliki u
 
 > openssl pkcs12 -export -out keyStore.p12 -inkey CertyfikatKSEF.key  -in CertyfikatKSEF.crt
 
+## NIP
+NIP przekazywany jako parametr do wszystkich wywołań może przybierać dwie postacie:
+
+* NIP
+* NIP$podkatalog
+
+W drugim przypadku po symbolu NIP są dodane separator $ oraz nazwa podkatalogu. Podkatalog ma znaczenie dla tworzenia struktury logów oraz miejsca składowania faktur/UPO. Bez podkatalogu miejscem jest zawsze symbol NIP. Z podkatalogiem do NIP jest dodawany podkatalog. 
+Ten sam symbol NIP może być wywoływany z różnymi podkatalogami. Przykład:
+* 7497725064, miejscem składowania jest NIP 7497725064
+* 7497725064$ROK2025, miejscem składowania jest 7497725064/ROK2025  
 
 ## Struktura kodu w Python
 
@@ -87,10 +97,10 @@ Przykładowa komenda tworząca plik P12. Pliki CertyfikatKSEF zawierają pliki u
 
 ## Struktura katalogu z logami i dziennikiem
 
-Katalog jest wskazywany przez zmienną środowiskową *KSEFDIR*. Dane są logowane na poziomie wspólnym i na poziomie NIP. Dodatkowo każda wysłana faktura tworzy podakatalog z numerem KSeF nadanym po wysłaniu, gdzie zawarty jest odczytany plik UPO oraz wysłana faktura. Zapamietywane są tylko faktury zaakceptowane w KSeF 2.0 i mające nadany numer KSeF.
+Katalog jest wskazywany przez zmienną środowiskową *KSEFDIR*. Dane są logowane na poziomie wspólnym i na poziomie NIP. Dodatkowo każda wysłana faktura tworzy podkatalog z numerem KSeF nadanym po wysłaniu, gdzie zawarty jest odczytany plik UPO oraz wysłana faktura. Zapamietywane są tylko faktury zaakceptowane w KSeF 2.0 i mające nadany numer KSeF.
 
 * KSEFDIR
-  * events.csv Plik z formacie tekstowym CSV z historią operacji. Pamiętane są operacje zakończone sukcesem oraz operacje które nie zostały wykonane z opisem błędu.
+  * events.csv Plik w formacie tekstowym CSV z historią operacji. Pamiętane są operacje zakończone sukcesem oraz operacje, które nie zostały wykonane z opisem błędu.
   * ksef.log Zawiera dane logging z wykonywania
   * {nip}
     * events.csv Plik w formacie tekstowym CSV z historią operacji. Zawiera te same dane co plik event.csv w katalogu KSEFDIR, ale tylko dla danego NIP
@@ -125,10 +135,10 @@ akcja, dopuszczalne wartości:
 * wyslij_wsadowo Wysyła paczkę faktur w sesji wsadowej
 
 nip:
-* Numer NIP użytkownika KSeF 2.0. Numer NIP musi być zawarty w plik *KSEFCONF*. Z pliku konfiguracyjnego jest odczytywany odpowiedni token służący do autentykacji.
+* Numer NIP użytkownika KSeF 2.0. Numer NIP musi być zawarty w pliku *KSEFCONF*. Z pliku konfiguracyjnego jest odczytywany odpowiedni token służący do autentykacji.
 
 plik_na_wynik:
-* Nazwa pliku gdzie będzie zapisany wynik akcji. Wynik jest zapisany w formacie JSON.
+* Nazwa pliku, gdzie będzie zapisany wynik akcji. Wynik jest zapisany w formacie JSON.
 
 Plik zawiera zawsze dwa pola oraz dodatkowe pola zależne od akcji
 * OK: true/false Akcja zakończona sukcesem lub niepowodzeniem
@@ -239,6 +249,19 @@ Zwraca w plik_na_wynik
   * errmess
   * katalog: Katalog tymczasowy, gdzie znajdują się odczytane faktury lub None, jeśli nic nie odczytano
   * liczba_faktur: Liczba odczytanych faktur. Liczba może być 0, wówczas katalog jest None
+
+## daj_konfiguracje
+
+Pozwala sprawdzić, czy NIP jest skonfigurowany do komunikacji z systemem KSeF 2.0
+
+> python -m ksef_cli daj_konfiguracje  \<nip\> <plik_na_wynik>
+
+Zwraca w plik_na_wynik
+  * OK: true/false
+  * errmess
+  * mess, Dodatkowy komunikat
+  * auth: Dwa wartości, token lub certyfikat
+
 
 ## Przykładowe wywołanie
 > export KSEFCONF=/ścieżka/ <br>
