@@ -82,4 +82,11 @@ pobierz_zbiorczo
     katalog: Katalog tymczasowy, gdzie znajdują się odczytane faktury lub None, jeśli nic nie odczytano
     liczba_faktur: Liczba odczytanych faktur. Liczba może być 0, wówczas katalog jest None
 
+daj_konfiguracje
+  python -m ksef_cli daj_konfiguracje  <nip> <plik_na_wynik>
 
+  Zwraca w plik_na_wynik
+    OK: true/false
+    errmess
+    auth: Metoda authentykcji, token lub certyfikat
+    mess: Komunikat, jest lub nie jest skonfigurowany

@@ -29,7 +29,7 @@ class _A:
     @property
     def nip(self) -> NIP:
         return self._nip
-    
+
     @property
     def C(self) -> CONF:
         return self._C
@@ -63,6 +63,18 @@ class E(_A):
         self._start_time = time.time()
         self._output = output
 
+    @staticmethod
+    def zapisz_res(output: str | None, res: bool, errmess: str|None, res_dict: dict):
+        if output is not None:
+            # zapisz output
+            res_output = {
+                "OK": res,
+                "errmess": errmess,
+            }
+            res_output.update(res_dict)
+            with open(output, "w") as f:
+                json.dump(res_output, f)
+
     def koniec(self, res: bool, errmess: str, res_dict=None):
         res_dict = res_dict or {}
         end_time = time.time()
@@ -86,15 +98,7 @@ class E(_A):
                 if f.tell() == 0:
                     writer.writeheader()
                 writer.writerow(info)
-        if self._output is not None:
-            # zapisz output
-            res_output = {
-                "OK": res,
-                "errmess": errmess,
-            }
-            res_output.update(res_dict)
-            with open(self._output, "w") as f:
-                json.dump(res_output, f)
+        E.zapisz_res(self._output, res=res, errmess=errmess, res_dict=res_dict)
 
 
 class LOGGER(_A):

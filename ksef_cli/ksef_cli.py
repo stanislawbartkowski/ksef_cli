@@ -1,4 +1,5 @@
 import io
+import json
 import os
 import shutil
 import tempfile
@@ -244,3 +245,25 @@ class KSEFCLI(LOGGER):
         return {
             "invoices": d_invoices
         }, msg
+
+    def daj_konfiguracje(self, output: str):
+        errmess = None
+        auth = "token"
+        nip: NIP = self.nip
+        ok: bool = True
+        mess = "Skonfigurowane"
+        try:
+            token: TOKEN = odczytaj_tokny(self.C, nip.nip)
+            if token.p12 is not None:
+                auth = "certyfikat"
+        except Exception as e:
+            errmess = f"Połącznie z KSeF 2.0 nie jest skonfigurawane dla {nip.nip}"
+            mess = "Nie jest skonfigurowane"
+            self.logger.warning(errmess, e)
+            ok = False
+        res = {
+            "auth": auth,
+            "mess": mess
+        }
+        E.zapisz_res(output, res=ok, errmess=errmess, res_dict=res)
+        return ok, mess
