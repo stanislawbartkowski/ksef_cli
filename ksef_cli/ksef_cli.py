@@ -257,7 +257,7 @@ class KSEFCLI(LOGGER):
             if token.p12 is not None:
                 auth = "certyfikat"
         except Exception as e:
-            errmess = f"Połącznie z KSeF 2.0 nie jest skonfigurawane dla {nip.nip}"
+            errmess = f"Połączenie z KSeF 2.0 nie jest skonfigurawane dla {nip.nip}"
             mess = "Nie jest skonfigurowane"
             self.logger.warning(errmess, e)
             ok = False
