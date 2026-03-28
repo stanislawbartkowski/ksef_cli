@@ -12,7 +12,7 @@ Dodatkowe cechy rozwiązania:
 
 Testowane dla wersji: 3.10, 3.11 i 3.12
 
-Testowane tylko w testowym środowisku KSeF 2.0. Nie było weryfikowane w pozostałych środowiskach.
+Testowane w testowym środowisku KSeF 2.0. Jest także wykorzystywane w produkcyjnym środowisku.
 
 ## Konfiguracja
 
