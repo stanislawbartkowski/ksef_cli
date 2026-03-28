@@ -23,6 +23,12 @@ Zmienne środowiskowe
 
 ## Instalacja
 > pip install git+https://github.com/stanislawbartkowski/ksef_cli.git<br>
+
+lub
+
+> pip install ksef2.0-cli
+
+
 > python<br>
 > import ksef_cli<br>
 
