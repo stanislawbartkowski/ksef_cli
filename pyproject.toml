@@ -16,7 +16,7 @@
     {name = "Stanisław Bartkowski", email = "stanislawbartkowski@gmail.com"},                                                                                                                                                                              
   ]                                                                                                                                                                                                                                                          
   dependencies = [
-    "ksef2.0_python @ git+https://github.com/stanislawbartkowski/ksef_pyth.git",                                                                                                                                                                             
+    "ksef2.0-python",                                                                                                                                                                             
     "pyyaml"                                                                                                                                                                                                                                               
   ]                                                                                                                                                                                                                                                        
   readme = "README.md" 
