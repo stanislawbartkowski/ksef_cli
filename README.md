@@ -175,7 +175,7 @@ Zwracana wartość w pliku *plik_na_wynik*
 ## wyslij_wsadowo
 [link](https://github.com/stanislawbartkowski/ksef_pyth/tree/main?tab=readme-ov-file#wys%C5%82anie-paczki-faktur-w-trybie-wsadowym)
 
-> python -m ksef_cli wyslij_wsadowo <nip> <plik_na_wynik> <katalog z paczką faktur>
+> python -m ksef_cli wyslij_wsadowo\ <nip\> <plik_na_wynik> <katalog z paczką faktur>
 
 * \<katalog z paczką faktur\>. Katalog w którym znajdują się faktury XML gotowe do wysłania do systemu KSeF. Wysyłane są tylko pliki z rozszerzeniem \.xml, inne pliki są ignorowane. UWAGA: w środowisku testowym akceptowanych jest tylko pierwsze 10 faktur, pozostałe są ignorowane bez sygnalizowania żadnego błędu.
 
