@@ -1,3 +1,6 @@
+## Wersja 1.1.2 Data: 2026/04/01
+* Poprawienie drobnego błędu dotyczącego logowania zdarzeń
+  
 ## Wersja 1.1.1 Data: 2026/03/21
 * Możliwość kwalifikacji symbolu NIP podkatalogiem
 * wez_konfiguracje, sprawdzenie, czy NIP jest skonfigurowany do komunikacji z systemem KSeF 2.0
