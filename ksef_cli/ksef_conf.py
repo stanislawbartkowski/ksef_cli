@@ -13,6 +13,10 @@ class NIP:
         return self._nip
 
     @property
+    def nip_s(self) -> str:
+        return self._nip if self._subdir is None else f"{self._nip}${self._subdir}"
+
+    @property
     def nipdir(self) -> str:
         return self._nip if self._subdir is None else os.path.join(self._nip, self._subdir)
 

@@ -84,14 +84,14 @@ class E(_A):
             "end_time": _toiso_str(end_time),
             "elapsed_seconds": f"{elapsed:.2f}",
             "a": self._action,
-            "action:": self._d.get(self._action, "Nieznana akcja"),
+            "action": self._d.get(self._action, "Nieznana akcja"),
             "result": "OK" if res else "FAIL",
             "errmess": "" if res else errmess,
-            "nip": self.nip,
+            "nip": self.nip.nip_s,
             "addinfo": errmess if res else ""
         }
         list = ["start_time", "end_time", "elapsed_seconds",
-                "a", "action:", "result", "errmess", "nip", "addinfo"]
+                "a", "action", "result", "errmess", "nip", "addinfo"]
         for f in self.C.get_events_file(), self.C.get_nip_events_file(self.nip):
             with open(f, 'a', newline='', encoding='utf-8') as f:
                 writer = csv.DictWriter(f, fieldnames=list, delimiter="|")
