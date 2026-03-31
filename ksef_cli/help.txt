@@ -1,7 +1,7 @@
 Wywołanie:
   python -m ksef_cli <akcja> <nip> <plik_na_wynik> <dodatkowe_parametry>
 
-Wersja 1.1.1 z dnia 21 marca 2026 rok.
+Wersja 1.1.2 z dnia 1 kwietnia 2026 rok.
 
 Akcje:
   wyslij_fakture Wysłanie faktury do system KSeF 2.0
