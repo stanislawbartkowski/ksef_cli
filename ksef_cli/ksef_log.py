@@ -64,7 +64,7 @@ class E(_A):
         self._output = output
 
     @staticmethod
-    def zapisz_res(output: str | None, res: bool, errmess: str|None, res_dict: dict):
+    def zapisz_res(output: str | None, res: bool, errmess: str | None, res_dict: dict):
         if output is not None:
             # zapisz output
             res_output = {
@@ -92,8 +92,8 @@ class E(_A):
         }
         list = ["start_time", "end_time", "elapsed_seconds",
                 "a", "action", "result", "errmess", "nip", "addinfo"]
-        for f in self.C.get_events_file(), self.C.get_nip_events_file(self.nip):
-            with open(f, 'a', newline='', encoding='utf-8') as f:
+        for f_name in [self.C.get_events_file(), self.C.get_nip_events_file(self.nip)]:
+            with open(f_name, 'a', newline='', encoding='utf-8') as f:
                 writer = csv.DictWriter(f, fieldnames=list, delimiter="|")
                 if f.tell() == 0:
                     writer.writeheader()
@@ -109,7 +109,7 @@ class LOGGER(_A):
         self._logger = logging.getLogger(__name__)
 
     def genE(self, action: int, output: str | None) -> E:
-        return E(self.C, nip=self.nip.nip, action=action, output=output)
+        return E(self.C, nip=self.nip.nip_s, action=action, output=output)
 
     @property
     def logger(self):

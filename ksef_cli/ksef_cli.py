@@ -263,7 +263,13 @@ class KSEFCLI(LOGGER):
             ok = False
         res = {
             "auth": auth,
-            "mess": mess
+            "mess": mess,
+            "files": {
+                "ksef_conf": self.C.ksef_conf_path,
+                "work_dir": self.C.work_nip_dir(nip),
+                "events_file": self.C.get_nip_events_file(nip),
+                "log_file": self.C.get_nip_log_file(nip)
+            }
         }
         E.zapisz_res(output, res=ok, errmess=errmess, res_dict=res)
         return ok, mess
