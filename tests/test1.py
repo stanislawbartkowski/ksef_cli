@@ -598,8 +598,30 @@ class TestKSEFCliCertNIPDIR(CertKsefCO, AbstractTestKSEFCLI):
 
     AT = TestKsefCli()
 
+    def _weryfikuj_konfiguracje(self, nip):
+        output = T.temp_ojosn()
+        res = self.AT.daj_konfiguracje(C=self.C, output=output, nip=nip)
+        print(res)
+        self.assertTrue(res[0])
+        d = _wez_res(output)
+        print(d)
+        self.assertTrue(d["OK"])
+        files = d["files"]
+        nip_N = NIP(nip)
+        self.assertEqual(self.C.ksef_conf_path, files["ksef_conf"])
+        self.assertEqual(self.C.work_nip_dir(nip_N), files["work_dir"])
+        self.assertEqual(self.C.get_nip_events_file(
+            nip_N), files["events_file"])
+        self.assertEqual(self.C.get_nip_log_file(nip_N), files["log_file"])
+        # sprawdz, czy w ściece jest nip i YYYY
+        self.assertIn(T.NIP, files["events_file"])
+        self.assertIn("YYYY", files["events_file"])
+        self.assertIn(T.NIP, files["log_file"])
+        self.assertIn("YYYY", files["log_file"])
+
     def test_wyslij_fakture_sprzedazy(self):
         self._test_wyslij_fakture_sprzedazy(self.AT, nip=T.NIPDIR)
+        self._weryfikuj_konfiguracje(T.NIPDIR)
 
     def test_wez_upo_dla_faktury(self):
         self._test_wez_upo_dla_faktury(self.AT, nip=T.NIPDIR)
