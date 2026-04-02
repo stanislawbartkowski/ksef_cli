@@ -1,3 +1,7 @@
+## Wersja 1.1.3 Data: 2026/04/02
+* Poprawienie ścieżki do logowania zdarzeń dla nip kwalifikowanego podkatalogiem
+* Więcej informacje zwracanych w wez_konfiguracje
+
 ## Wersja 1.1.2 Data: 2026/04/01
 * Poprawienie drobnego błędu dotyczącego logowania zdarzeń
   
