@@ -267,6 +267,11 @@ Zwraca w plik_na_wynik
   * errmess
   * mess, Dodatkowy komunikat
   * auth: Dwa wartości, token lub certyfikat
+  * files:
+    * ksef_conf, wartość zmiennej konfiguracyjnej KSEFCONF
+    * work_dir, ścieżka katalogu z danymi dla NIP. Jest to podkatalog WORKDIR dla danego NIP
+    * log_file, ścieżka do pliku z logami tworzonymi w trakcie wykonywania operacji
+    * events_file, ścieżka do pliku z dziennikiem operacji dla danego NIP
 
 
 ## Przykładowe wywołanie
