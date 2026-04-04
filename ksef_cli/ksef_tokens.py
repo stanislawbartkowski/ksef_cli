@@ -12,7 +12,8 @@ _env = {
     'demo': KSEFSDK.PREKSEF
 }
 
-TOKEN = namedtuple('TOKENS', ['nip', 'env', 'token', "p12", "password"])
+TOKEN = namedtuple(
+    'TOKENS', ['nip', 'env', 'token', "p12", "password", "env_s"])
 
 
 def is_cert(t: TOKEN) -> bool:
@@ -50,4 +51,4 @@ def odczytaj_tokny(C: CONF, nip: str) -> TOKEN:
         if ksef_env is None:
             raise ValueError(
                 f"{key} Nierozpoznane środowisko KSEF: {env}. Dopuszczalne wartości: 'prod', 'test', 'demo'.")
-        return TOKEN(nip=nip, env=ksef_env, token=token, p12=p12, password=password)
+        return TOKEN(nip=nip, env=ksef_env, token=token, p12=p12, password=password, env_s=env)

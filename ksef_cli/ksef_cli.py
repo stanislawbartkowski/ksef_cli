@@ -264,6 +264,7 @@ class KSEFCLI(LOGGER):
         res = {
             "auth": auth,
             "mess": mess,
+            "env": token.env_s if ok else None,
             "files": {
                 "ksef_conf": self.C.ksef_conf_path,
                 "work_dir": self.C.work_nip_dir(nip),

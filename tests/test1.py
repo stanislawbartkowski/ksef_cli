@@ -607,6 +607,7 @@ class TestKSEFCliCertNIPDIR(CertKsefCO, AbstractTestKSEFCLI):
         print(d)
         self.assertTrue(d["OK"])
         files = d["files"]
+        self.assertEqual("test", d["env"])
         nip_N = NIP(nip)
         self.assertEqual(self.C.ksef_conf_path, files["ksef_conf"])
         self.assertEqual(self.C.work_nip_dir(nip_N), files["work_dir"])
