@@ -1,3 +1,6 @@
+## Wersja 1.1.4 Data: 2026/04/04
+* Dodanie środowiska do daj_konfiguracje
+
 ## Wersja 1.1.3 Data: 2026/04/02
 * Poprawienie ścieżki do logowania zdarzeń dla nip kwalifikowanego podkatalogiem
 * Więcej informacje zwracanych w wez_konfiguracje
