@@ -266,7 +266,8 @@ Zwraca w plik_na_wynik
   * OK: true/false
   * errmess
   * mess, Dodatkowy komunikat
-  * auth: Dwa wartości, token lub certyfikat
+  * auth, Dwa wartości, token lub certyfikat
+  * env, Środowisko: prod, demo lub test. Wartość z pliku kseftoken
   * files:
     * ksef_conf, wartość zmiennej konfiguracyjnej KSEFCONF
     * work_dir, ścieżka katalogu z danymi dla NIP. Jest to podkatalog WORKDIR dla danego NIP
