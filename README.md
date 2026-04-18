@@ -255,6 +255,11 @@ Zwraca w plik_na_wynik
   * errmess
   * katalog: Katalog tymczasowy, gdzie znajdują się odczytane faktury lub None, jeśli nic nie odczytano
   * liczba_faktur: Liczba odczytanych faktur. Liczba może być 0, wówczas katalog jest None
+  * subject:
+    * Subject1	Podmiot 1 - sprzedawca
+    * Subject2	Podmiot 2 - nabywca
+    * Subject3	Podmiot 3
+    * SubjectAuthorized	Podmiot upoważniony
 
 ## daj_konfiguracje
 
