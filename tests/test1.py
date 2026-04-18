@@ -57,6 +57,10 @@ class AKsefCli:
     def daj_konfiguracje(C: CONF, output: str, nip: str) -> tuple[bool, str]:
         raise NotImplementedError
 
+    @staticmethod
+    def daj_bufor_zakupowe(C: CONF, output: str, nip: str) -> tuple[bool, str]:
+        raise NotImplementedError
+
 
 class TestKsefCli(AKsefCli):
 
@@ -174,6 +178,11 @@ class TestKsefCliMain(AKsefCli):
     @staticmethod
     def daj_konfiguracje(C: CONF, output: str, nip: str) -> tuple[bool, str]:
         argv = ["", "daj_konfiguracje", nip, output]
+        return _run_main_res(argv, output)
+
+    @staticmethod
+    def daj_bufor_zakupowe(C: CONF, output: str, nip: str) -> tuple[bool, str]:
+        argv = ["", "daj_zakupowe_bufor", nip, output]
         return _run_main_res(argv, output)
 
 
@@ -479,6 +488,12 @@ class AbstractTestKSEFCLI(unittest.TestCase):
         print(res)
         self.assertFalse(res[0])
 
+    def _test_wez_bufor_zakupowe(self, A: AKsefCli):
+        nip = T.NIP_NABYWCADIR
+        output = T.temp_ojosn()
+        res = A.daj_bufor_zakupowe(C=self.C, output=output, nip=nip)
+        print(res)
+
 
 class TestKSEFCli(TokenKsefCO, AbstractTestKSEFCLI):
 
@@ -686,6 +701,9 @@ class TestKSEFCliMain(TokenKsefCO, AbstractTestKSEFCLI):
 
     def test_sprawdz_konfiguracje(self):
         self._test_sprawdz_konfiguracje(self.AM)
+
+    def test_wez_bufor_zakupowe(self):
+        self._test_wez_bufor_zakupowe(self.AM)
 
 
 class TestKSEFWsadowe(TokenKsefCO, AbstractTestKSEFCLI):
