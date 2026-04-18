@@ -61,6 +61,10 @@ class AKsefCli:
     def daj_bufor_zakupowe(C: CONF, output: str, nip: str) -> tuple[bool, str]:
         raise NotImplementedError
 
+    @staticmethod
+    def uaktualnij_bufor_zakupowe(C: CONF, output: str, nip: str) -> tuple[bool, str]:
+        raise NotImplementedError
+
 
 class TestKsefCli(AKsefCli):
 

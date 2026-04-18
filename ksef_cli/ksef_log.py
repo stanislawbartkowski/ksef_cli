@@ -46,6 +46,7 @@ class E(_A):
     CZYTANIE_FAKTUR_SPRZEDAZY = 6
     CZYTANIE_FAKTUR_ZBIORCZO = 7
     CZYTANIE_ZAKUPY_PRZYROSTOWO = 8
+    UAKTUALNIJ_ZAKUPY_PRZYROSTOWO = 9
 
     _d = {
         WYCZYSC_DANE: "Wyczyść dane robocze",
@@ -56,7 +57,8 @@ class E(_A):
         WYSLIJ_WSADOWO: "Wyślij faktury wsadowo",
         CZYTANIE_FAKTUR_SPRZEDAZY: "Czytanie faktur sprzedaży",
         CZYTANIE_FAKTUR_ZBIORCZO: "Czytanie faktur zbiorczo",
-        CZYTANIE_ZAKUPY_PRZYROSTOWO: "Czytanie przyrostowe"
+        CZYTANIE_ZAKUPY_PRZYROSTOWO: "Czytanie przyrostowe",
+        UAKTUALNIJ_ZAKUPY_PRZYROSTOWO: "Uaktualnij przyrostowe"
     }
 
     def __init__(self, C: CONF, nip: str, action: int, output: str | None):

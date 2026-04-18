@@ -4,6 +4,7 @@ import shutil
 import tempfile
 from typing import Callable
 from requests import HTTPError
+from datetime import date, timedelta, datetime
 
 import xml.etree.ElementTree as et
 import zipfile
@@ -16,6 +17,23 @@ from .ksef_log import LOGGER, E
 from .ksef_conf import CONF, NIP
 from .ksef_tokens import odczytaj_tokny, TOKEN, is_cert
 from .readp12 import read_cert
+
+
+def _today() -> str:
+    today = date.today()
+    return today.isoformat()
+
+
+def _minus_days(minus_days: int) -> str:
+    today = date.today()
+    t = timedelta(days=minus_days)
+    d = today - t
+    return d.isoformat()
+
+
+def _iso_format_to_date(s: str) -> str:
+    d = datetime.fromisoformat(s)
+    return d.date().isoformat()
 
 
 def _daj_cert(conf_path: str, t: TOKEN) -> tuple[bytes, bytes]:
@@ -311,7 +329,7 @@ class KSEFCLI(LOGGER, KSEF_ZAKUPOWE_HELPER):
         return ok, mess
 
     @ksef_action(action=E.CZYTANIE_ZAKUPY_PRZYROSTOWO)
-    def daj_bufor_zakupowe(self, output: str) -> tuple[dict, str]:
+    def daj_bufor_zakupowe(self,  K: KSEFSDK) -> tuple[dict, str]:
         alist = self.odczytaj_wszystkie_faktury_zakupowe(self)
         max_data = self.daj_ostatnia_data(alist)
         msg = f"Liczba zakupowych {len(alist)}, ostatnia data: {max_data if max_data else 'bufor pusty'}"
@@ -319,3 +337,25 @@ class KSEFCLI(LOGGER, KSEF_ZAKUPOWE_HELPER):
             "invoices": alist,
             "ostatnia_data": max_data
         }, msg
+
+    @ksef_action(action=E.UAKTUALNIJ_ZAKUPY_PRZYROSTOWO)
+    def uaktualnij_bufor_zakupowe(self,  K: KSEFSDK) -> tuple[dict, str]:
+        alist = self.odczytaj_wszystkie_faktury_zakupowe(self)
+        max_data = self.daj_ostatnia_data(alist)
+        date_from = _minus_days(
+            60) if max_data is None else _iso_format_to_date(max_data)
+        date_to = _today()
+        self.logger.info(
+            f"Odczyt faktur zakupowych od {date_from} do {date_to}")
+        liczba_faktur, dir_name = self._czytaj_zbiorczo(K=K, data_od=date_from,
+                                                        data_do=date_to, subject=KSEFSDK.SUBJECT2)
+
+        def _wynik(liczba_faktur: int) -> tuple[dict, str]:
+            mess = f"Znaleziono nowych {liczba_faktur} faktur w okresie {date_from} - {date_to} dla subject {KSEFSDK.SUBJECT2}"
+            return {
+                "liczba_faktur": liczba_faktur
+            }, mess
+        if liczba_faktur == 0:
+            return _wynik(0)
+        nlist = self.uaktualnij_faktury(self, alist, dir_name)
+        return _wynik(len(nlist))
