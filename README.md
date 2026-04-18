@@ -253,7 +253,7 @@ Zwracana wartość w pliku *plik_na_wynik*
 Zwraca w plik_na_wynik
   * OK: true/false
   * errmess
-  * katalog: Katalog tymczasowy, gdzie znajdują się odczytane faktury lub None, jeśli nic nie odczytano
+  * katalog: Katalog tymczasowy, gdzie znajdują się odczytane faktury lub None, jeśli nic nie odczytano. Jeśli odczytano faktury, to w katalogu pojawi się także plik _metadata.json zawierający zbiorczą informację o odczytanych fakturach.
   * liczba_faktur: Liczba odczytanych faktur. Liczba może być 0, wówczas katalog jest None
   * subject:
     * Subject1	Podmiot 1 - sprzedawca
