@@ -93,8 +93,7 @@ class CONF:
     # --------------------
 
     def _zakupowe_base_dir(self):
-        path = os.path.join(self._ksef_work_path, "-zakupowe")
-        return path
+        return self._ksef_work_path+"-zakupowe"
 
     def zakupowe_dir_nip(self, nip: NIP) -> str:
         # bez dir

@@ -1,7 +1,7 @@
 Wywołanie:
   python -m ksef_cli <akcja> <nip> <plik_na_wynik> <dodatkowe_parametry>
 
-Wersja 1.1.4 z dnia 4 kwietnia 2026 rok.
+Wersja 1.1.5 z dnia 19 kwietnia 2026 rok.
 
 Akcje:
   wyslij_fakture Wysłanie faktury do system KSeF 2.0
@@ -12,6 +12,11 @@ Akcje:
   wyczysc_dane Wyczyść lokalne dane dla NIPu (dla celów testowych)
   wyslij_wsadowo Wyślij paczkę faktur w trybie wsadowym
   pobierz_zbiorczo Odczytaj zbiorczo paczkę faktur
+  daj_zakupowe_bufor Odczytaj faktury zakupowe z bufora zakupowych
+  uaktualnij_zakupowe_bufor Ukatualnij bufor faktur zakupowych
+  wez_faktura_bufor Podaj ścieżke do faktury zakupowej
+
+
 
 Nip:
   Numer NIP użytkownika KSeF 2.0. NIP musi mieć odpowiednik z pliku konfiguracyjnym
@@ -90,3 +95,30 @@ daj_konfiguracje
     errmess
     auth: Metoda authentykcji, token lub certyfikat
     mess: Komunikat, NIP jest lub nie jest skonfigurowany
+
+daj_zakupowe_bufor
+  python -m ksef_cli daj_zakupowe_bufor  <nip> <plik_na_wynik>
+
+  Zwraca w plik_na_wynik
+    OK: true/false
+    errmess
+    invoices: Lista metadanych dla faktur zakupowych w buforze
+    ostatnia_data: Data ostatniej faktury w buforze
+
+uaktualnij_zakupowe_bufor
+  python -m ksef_cli uaktualnij_zakupowe_bufor  <nip> <plik_na_wynik>
+
+  Zwraca w plik_na_wynik
+    OK: true/false
+    errmess
+    liczba_faktur: Liczba nowo odczytanych faktur, może być 0, jeśli żadna nowa faktura się nie pojawiła
+
+wez_faktura_bufor
+  python -m ksef_cli wez_faktura_bufor  <nip> <plik_na_wynik> <numer_ksef>
+
+  Zwraca w plik_na_wynik
+    OK: true/false
+    errmess
+    faktura_path: pełna ścieżka do pliku XML z treścią faktury KSeF
+
+  
