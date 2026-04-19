@@ -23,7 +23,6 @@ def _run_main_res(argv: list[str], output: str) -> tuple[bool, str]:
     T.ustaw_E()
     run_main(argv)
     d = _wez_res(output)
-    print(d)
     return d["OK"], d["errmess"]
 
 
