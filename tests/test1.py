@@ -542,7 +542,6 @@ class AbstractTestKSEFCLI(unittest.TestCase):
         res = A.daj_bufor_zakupowe(C=self.C, output=output, nip=nip)
         print(res)
         d = _wez_res(output)
-        print(d)
         invoices = d["invoices"]
 
         # teraz odczytaj drugi raz
@@ -553,7 +552,6 @@ class AbstractTestKSEFCLI(unittest.TestCase):
         res = A.daj_bufor_zakupowe(C=self.C, output=output, nip=nip)
         print(res)
         d = _wez_res(output)
-        print(d)
         invoices1 = d["invoices"]
         self.assertEqual(len(invoices), len(invoices1))
 
@@ -581,9 +579,7 @@ class AbstractTestKSEFCLI(unittest.TestCase):
         print(res)
         res = A.daj_bufor_zakupowe(C=self.C, output=output, nip=nip)
         d = _wez_res(output)
-        print(d)
         invoices = d["invoices"]
-
 
         # teraz wystaw fakture sprzedazy
         fa = T.FAKTURA_WZORZEC
@@ -602,7 +598,6 @@ class AbstractTestKSEFCLI(unittest.TestCase):
         res = A.daj_bufor_zakupowe(C=self.C, output=output, nip=nip)
         print(res)
         d = _wez_res(output)
-        print(d)
         invoices1 = d["invoices"]
         # jedna więcej
         self.assertEqual(len(invoices) + 1, len(invoices1))
