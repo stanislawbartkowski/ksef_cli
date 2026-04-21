@@ -23,11 +23,14 @@ def _run_main_res(argv: list[str], output: str) -> tuple[bool, str]:
     T.ustaw_E()
     run_main(argv)
     d = _wez_res(output)
-    print(d)
     return d["OK"], d["errmess"]
 
 
 class AKsefCli:
+
+    @staticmethod
+    def wyczysc_dane(C: CONF, output: str, nip: str) -> tuple[bool, str]:
+        raise NotImplementedError
 
     @staticmethod
     def odczytaj_faktury_zakupowe(C: CONF, output: str, nip: str, data_od: str, data_do: str) -> tuple[bool, str]:
@@ -55,6 +58,18 @@ class AKsefCli:
 
     @staticmethod
     def daj_konfiguracje(C: CONF, output: str, nip: str) -> tuple[bool, str]:
+        raise NotImplementedError
+
+    @staticmethod
+    def daj_bufor_zakupowe(C: CONF, output: str, nip: str) -> tuple[bool, str]:
+        raise NotImplementedError
+
+    @staticmethod
+    def uaktualnij_bufor_zakupowe(C: CONF, output: str, nip: str) -> tuple[bool, str]:
+        raise NotImplementedError
+
+    @staticmethod
+    def wez_faktura_bufor(C: CONF, output: str, nip: str, ksef_number: str) -> tuple[bool, str]:
         raise NotImplementedError
 
 
@@ -142,6 +157,11 @@ class TestWsadowoMainKsefCli(TestKsefCli):
 class TestKsefCliMain(AKsefCli):
 
     @staticmethod
+    def wyczysc_dane(C: CONF, output: str, nip: str) -> tuple[bool, str]:
+        argv = ["", "wyczysc_dane", nip, output]
+        return _run_main_res(argv, output)
+
+    @staticmethod
     def odczytaj_faktury_zakupowe(C: CONF, output: str, nip: str, data_od: str, data_do: str) -> tuple[bool, str]:
         argv = ["", "pobierz_zakupowe", nip, output, data_od, data_do]
         return _run_main_res(argv, output)
@@ -174,6 +194,21 @@ class TestKsefCliMain(AKsefCli):
     @staticmethod
     def daj_konfiguracje(C: CONF, output: str, nip: str) -> tuple[bool, str]:
         argv = ["", "daj_konfiguracje", nip, output]
+        return _run_main_res(argv, output)
+
+    @staticmethod
+    def daj_bufor_zakupowe(C: CONF, output: str, nip: str) -> tuple[bool, str]:
+        argv = ["", "daj_zakupowe_bufor", nip, output]
+        return _run_main_res(argv, output)
+
+    @staticmethod
+    def uaktualnij_bufor_zakupowe(C: CONF, output: str, nip: str) -> tuple[bool, str]:
+        argv = ["", "uaktualnij_zakupowe_bufor", nip, output]
+        return _run_main_res(argv, output)
+
+    @staticmethod
+    def wez_faktura_bufor(C: CONF, output: str, nip: str, ksef_number: str) -> tuple[bool, str]:
+        argv = ["", "wez_faktura_bufor", nip, output, ksef_number]
         return _run_main_res(argv, output)
 
 
@@ -479,6 +514,114 @@ class AbstractTestKSEFCLI(unittest.TestCase):
         print(res)
         self.assertFalse(res[0])
 
+    def _test_wez_bufor_zakupowe(self, A: AKsefCli):
+        nip = T.NIP_NABYWCADIR
+        output = T.temp_ojosn()
+        res = A.daj_bufor_zakupowe(C=self.C, output=output, nip=nip)
+        print(res)
+
+    def _test_uaktualnij_bufor_zakupowe_zero(self, A: AKsefCli):
+        nip = T.NIP_NABYWCADIR
+        output = T.temp_ojosn()
+        # wyczysc dane
+        A.wyczysc_dane(C=self.C, output=output, nip=nip)
+        res = A.uaktualnij_bufor_zakupowe(C=self.C, output=output, nip=nip)
+        print(res)
+        # jeszcze raz - powinno być 0
+        res = A.uaktualnij_bufor_zakupowe(C=self.C, output=output, nip=nip)
+        print(res)
+        self.assertIn("0 nowych faktur", res[1])
+
+    def _test_uaktualnij_bufor_zakupowe(self, A: AKsefCli):
+        nip = T.NIP_NABYWCADIR
+        output = T.temp_ojosn()
+        # wyczysc dane
+        A.wyczysc_dane(C=self.C, output=output, nip=nip)
+        # we zakupowe powinny być puste
+        res = A.daj_bufor_zakupowe(C=self.C, output=output, nip=nip)
+        print(res)
+        d = _wez_res(output)
+        print(d)
+        invoices = d["invoices"]
+        self.assertEqual(0, len(invoices))
+
+        # teraz uaktualnij
+        res = A.uaktualnij_bufor_zakupowe(C=self.C, output=output, nip=nip)
+        print(res)
+
+        # teraz odczytaj ponownie zakupowe, powinny być faktury
+        res = A.daj_bufor_zakupowe(C=self.C, output=output, nip=nip)
+        print(res)
+        d = _wez_res(output)
+        invoices = d["invoices"]
+
+        # teraz odczytaj drugi raz
+        res = A.uaktualnij_bufor_zakupowe(C=self.C, output=output, nip=nip)
+        print(res)
+        # nic nie odczytano
+        self.assertIn("0 nowych faktur", res[1])
+        res = A.daj_bufor_zakupowe(C=self.C, output=output, nip=nip)
+        print(res)
+        d = _wez_res(output)
+        invoices1 = d["invoices"]
+        self.assertEqual(len(invoices), len(invoices1))
+
+        # teraz odczytak faktura z bufora
+        # tylko pierwsze 100
+        no = 0
+        for e in invoices:
+            if no > 100: break
+            no += 1
+            ksef_number = e["ksefNumber"]
+            res = A.wez_faktura_bufor(
+                C=self.C, output=output, nip=nip, ksef_number=ksef_number)
+            print(res)
+            self.assertTrue(res[0])
+            d = _wez_res(output)
+            print(d)
+            invoice = d["faktura_path"]
+            with open(invoice, "r") as f:
+                invoice_xml = f.read()
+                et.fromstring(invoice_xml)
+
+    def _test_bufor_zakupowe_wez_jeden(self, A: AKsefCli):
+        nip = T.NIP_NABYWCADIR
+        output = T.temp_ojosn()
+        # wyczysc dane
+        A.wyczysc_dane(C=self.C, output=output, nip=nip)
+        # teraz uaktualnij
+        res = A.uaktualnij_bufor_zakupowe(C=self.C, output=output, nip=nip)
+        print(res)
+        res = A.daj_bufor_zakupowe(C=self.C, output=output, nip=nip)
+        d = _wez_res(output)
+        invoices = d["invoices"]
+
+        # teraz wystaw fakture sprzedazy
+        fa = T.FAKTURA_WZORZEC
+        invoice_path, invoice_num = T.prepare_invoice_faktur(fa, "faktura.xml")
+
+        res = A.wyslij_fakture(C=self.C, output=output,
+                               nip=T.NIPDIR, invoice_path=invoice_path)
+        print(res)
+
+        # teraz uaktualnij
+        res = A.uaktualnij_bufor_zakupowe(C=self.C, output=output, nip=nip)
+        print(res)
+        self.assertTrue(res[0])
+        self.assertIn("1 nowych faktur", res[1])
+        # teraz odczytaj ponownie zakupowe, powinny być faktury
+        res = A.daj_bufor_zakupowe(C=self.C, output=output, nip=nip)
+        print(res)
+        d = _wez_res(output)
+        invoices1 = d["invoices"]
+        # jedna więcej
+        self.assertEqual(len(invoices) + 1, len(invoices1))
+
+        # wyszukaj nową fakturę
+        faktura = next(
+            f for f in invoices1 if f["invoiceNumber"] == invoice_num)
+        print(faktura)
+
 
 class TestKSEFCli(TokenKsefCO, AbstractTestKSEFCLI):
 
@@ -686,6 +829,18 @@ class TestKSEFCliMain(TokenKsefCO, AbstractTestKSEFCLI):
 
     def test_sprawdz_konfiguracje(self):
         self._test_sprawdz_konfiguracje(self.AM)
+
+    def test_wez_bufor_zakupowe(self):
+        self._test_wez_bufor_zakupowe(self.AM)
+
+    def test_uaktualnij_bufor_zakupowe_zero(self):
+        self._test_uaktualnij_bufor_zakupowe_zero(self.AM)
+
+    def test_uaktualnij_bufor_zakupowe(self):
+        self._test_uaktualnij_bufor_zakupowe(self.AM)
+
+    def test_bufor_zakupowe_wez_jeden(self):
+        self._test_bufor_zakupowe_wez_jeden(self.AM)
 
 
 class TestKSEFWsadowe(TokenKsefCO, AbstractTestKSEFCLI):

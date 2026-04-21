@@ -20,6 +20,10 @@ class NIP:
     def nipdir(self) -> str:
         return self._nip if self._subdir is None else os.path.join(self._nip, self._subdir)
 
+    @property
+    def subdir(self):
+        return self._subdir
+
 
 class CONF:
 
@@ -83,3 +87,26 @@ class CONF:
     def get_invoice_faktura(self, nip: NIP, ksef_numer: str) -> str:
         kdir = self._get_work_subdirectory(nip,  ksef_numer)
         return os.path.join(kdir, "faktura.xml")
+
+    # --------------------
+    # do modułu zakupowe
+    # --------------------
+
+    def _zakupowe_base_dir(self):
+        return self._ksef_work_path+"-zakupowe"
+
+    def zakupowe_dir_nip(self, nip: NIP) -> str:
+        # bez dir
+        path = os.path.join(self._zakupowe_base_dir(), nip.nip)
+        if not os.path.exists(path):
+            os.makedirs(path)
+        return path
+
+    def zakupowe_dir_nip_subdir(self, nip: NIP) -> str:
+        path = os.path.join(self._zakupowe_base_dir(), nip.nipdir)
+        if not os.path.exists(path):
+            os.makedirs(path)
+        return path
+
+    def zakupowe_start_czas(self, nip: NIP) -> str:
+        return os.path.join(self.zakupowe_dir_nip(nip), "start_czas.txt")

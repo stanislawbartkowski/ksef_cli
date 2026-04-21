@@ -45,6 +45,9 @@ class E(_A):
     WYSLIJ_WSADOWO = 5
     CZYTANIE_FAKTUR_SPRZEDAZY = 6
     CZYTANIE_FAKTUR_ZBIORCZO = 7
+    CZYTANIE_ZAKUPY_PRZYROSTOWO = 8
+    UAKTUALNIJ_ZAKUPY_PRZYROSTOWO = 9
+    WEZ_FAKTURA_BUFOR = 10
 
     _d = {
         WYCZYSC_DANE: "Wyczyść dane robocze",
@@ -54,7 +57,10 @@ class E(_A):
         WEZ_FAKTURE: "Weź fakturę z KSeF",
         WYSLIJ_WSADOWO: "Wyślij faktury wsadowo",
         CZYTANIE_FAKTUR_SPRZEDAZY: "Czytanie faktur sprzedaży",
-        CZYTANIE_FAKTUR_ZBIORCZO: "Czytanie faktur zbiorczo"
+        CZYTANIE_FAKTUR_ZBIORCZO: "Czytanie faktur zbiorczo",
+        CZYTANIE_ZAKUPY_PRZYROSTOWO: "Czytanie przyrostowe",
+        UAKTUALNIJ_ZAKUPY_PRZYROSTOWO: "Uaktualnij przyrostowe",
+        WEZ_FAKTURA_BUFOR: "Faktura z bufora zakupowego"
     }
 
     def __init__(self, C: CONF, nip: str, action: int, output: str | None):

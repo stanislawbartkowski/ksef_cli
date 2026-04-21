@@ -12,6 +12,9 @@ WYSLIJ_WSADOWO = "wyslij_wsadowo"
 POBIERZ_SPRZEDAZOWE = "pobierz_sprzedazowe"
 POBIERZ_ZBIORCZO = "pobierz_zbiorczo"
 DAJ_KONFIGURACJE = "daj_konfiguracje"
+DAJ_BUFOR_ZAKUPOWE = "daj_zakupowe_bufor"
+UAKTUALNIJ_BUFOR_ZAKUPOWE = "uaktualnij_zakupowe_bufor"
+WEZ_FAKTURA_BUFOR = "wez_faktura_bufor"
 
 HELP = "help"
 
@@ -24,7 +27,10 @@ _actions = {
     WYSLIJ_WSADOWO: (3, KSEFCLI.wyslij_wsadowo_do_ksef, ('faktury_dir',)),
     POBIERZ_SPRZEDAZOWE: (4, KSEFCLI.czytaj_faktury_sprzedazy, ('data_od', 'data_do')),
     POBIERZ_ZBIORCZO: (5, KSEFCLI.czytaj_faktury_zbiorczo, ('data_od', 'data_do', 'subject')),
-    DAJ_KONFIGURACJE: (2, KSEFCLI.daj_konfiguracje, ())
+    DAJ_KONFIGURACJE: (2, KSEFCLI.daj_konfiguracje, ()),
+    DAJ_BUFOR_ZAKUPOWE: (2, KSEFCLI.daj_bufor_zakupowe, ()),
+    UAKTUALNIJ_BUFOR_ZAKUPOWE: (2, KSEFCLI.uaktualnij_bufor_zakupowe, ()),
+    WEZ_FAKTURA_BUFOR: (3, KSEFCLI.wez_bufor_faktura, ('ksef_number',))
 }
 
 

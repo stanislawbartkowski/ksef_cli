@@ -1,20 +1,41 @@
 import io
-import json
 import os
 import shutil
 import tempfile
 from typing import Callable
 from requests import HTTPError
+from datetime import date, timedelta, datetime
 
 import xml.etree.ElementTree as et
 import zipfile
 
 from ksef import KSEFSDK
 
+from ksef_cli.ksef_zakupowe import KSEF_ZAKUPOWE_HELPER
+
 from .ksef_log import LOGGER, E
 from .ksef_conf import CONF, NIP
 from .ksef_tokens import odczytaj_tokny, TOKEN, is_cert
 from .readp12 import read_cert
+
+
+def _tomorrow() -> str:
+    today = date.today()
+    t = timedelta(days=1)
+    tomorrow = today + t
+    return tomorrow.isoformat()
+
+
+def _minus_days(minus_days: int) -> str:
+    today = date.today()
+    t = timedelta(days=minus_days)
+    d = today - t
+    return d.isoformat()
+
+
+def _iso_format_to_date(s: str) -> str:
+    d = datetime.fromisoformat(s)
+    return d.date().isoformat()
 
 
 def _daj_cert(conf_path: str, t: TOKEN) -> tuple[bytes, bytes]:
@@ -28,10 +49,10 @@ def _daj_cert(conf_path: str, t: TOKEN) -> tuple[bytes, bytes]:
     return read_cert(file_path=path_p12, password=password)
 
 
-class KSEFCLI(LOGGER):
+class KSEFCLI(LOGGER, KSEF_ZAKUPOWE_HELPER):
 
     @staticmethod
-    def ksef_action(action: int):
+    def ksef_action(action: int, enable_session=True):
         def ksef_action_decorator(func: Callable):
             def wrapper(self, output: str, **kwargs):
                 EV = self.genE(action, output=output)
@@ -51,13 +72,14 @@ class KSEFCLI(LOGGER):
                         key, cert = _daj_cert(self.C.ksef_conf_path, token)
                         # autentykacja certyfikatem
                         K = KSEFSDK.initsdkcert(
-                            env=token.env, nip=token.nip, p12pk=key, p12pc=cert)
+                            env=token.env, nip=token.nip, p12pk=key, p12pc=cert) if enable_session else None
                     else:
                         # autentykacja tokenem
                         K = KSEFSDK.initsdk(
-                            env=token.env, nip=token.nip, token=token.token)
+                            env=token.env, nip=token.nip, token=token.token) if enable_session else None
                     res_dict, mess = func(self, K, **kwargs)
-                    K.session_terminate()
+                    if K:
+                        K.session_terminate()
                     EV.koniec(res=True, errmess=mess, res_dict=res_dict)
                     return True, ""
                 except HTTPError as e:
@@ -88,6 +110,10 @@ class KSEFCLI(LOGGER):
         self.logger.info(msg)
         if os.path.exists(work_dir):
             shutil.rmtree(work_dir)
+        # faktury zakupowe
+        zak_dir = self.C.zakupowe_dir_nip_subdir(self.nip)
+        if os.path.exists(zak_dir):
+            shutil.rmtree(zak_dir)
         EV.koniec(res=True, errmess="")
 
     def _czytaj_faktury(self, K: KSEFSDK, data_od: str, data_do: str, subject: str) -> tuple[dict, str]:
@@ -170,8 +196,37 @@ class KSEFCLI(LOGGER):
                 "invoice": t.name
             }, ""
 
+    @staticmethod
+    def _czytaj_zbiorczo(K: KSEFSDK, data_od: str, data_do: str, subject: str) -> tuple[int, str | None]:
+        liczba_faktur, zipped_dane = K.get_batch_invoices(
+            date_from=data_od, date_to=data_do, subject=subject)
+        if liczba_faktur == 0:
+            return 0, None
+        t = tempfile.mkdtemp()
+        dir_name = t
+        with zipfile.ZipFile(io.BytesIO(zipped_dane)) as z:
+            for name in z.namelist():
+                t_file = os.path.join(dir_name, name)
+                t_data = z.read(name)
+                with open(t_file, "wb") as t:
+                    t.write(t_data)
+        return liczba_faktur, dir_name
+
     @ksef_action(action=E.CZYTANIE_FAKTUR_ZBIORCZO)
     def czytaj_faktury_zbiorczo(self, K: KSEFSDK, data_od: str, data_do: str, subject: str) -> tuple[dict, str]:
+        liczba_faktur, dir_name = self._czytaj_zbiorczo(
+            K, data_od, data_do, subject)
+
+        def _wynik(dir_name: str | None) -> tuple[dict, str]:
+            mess = f"Znaleziono {liczba_faktur} faktur w okresie {data_od} - {data_do} dla subject {subject}"
+            return {
+                "katalog": dir_name,
+                "liczba_faktur": liczba_faktur
+            }, mess
+        return _wynik(dir_name=dir_name)
+
+    @ksef_action(action=E.CZYTANIE_FAKTUR_ZBIORCZO)
+    def REMOVE_czytaj_faktury_zbiorczo(self, K: KSEFSDK, data_od: str, data_do: str, subject: str) -> tuple[dict, str]:
         liczba_faktur, zipped_dane = K.get_batch_invoices(
             date_from=data_od, date_to=data_do, subject=subject)
 
@@ -269,8 +324,49 @@ class KSEFCLI(LOGGER):
                 "ksef_conf": self.C.ksef_conf_path,
                 "work_dir": self.C.work_nip_dir(nip),
                 "events_file": self.C.get_nip_events_file(nip),
-                "log_file": self.C.get_nip_log_file(nip)
+                "log_file": self.C.get_nip_log_file(nip),
+                "work_zakupowe": self.C.zakupowe_dir_nip_subdir(nip)
             }
         }
         E.zapisz_res(output, res=ok, errmess=errmess, res_dict=res)
         return ok, mess
+
+    @ksef_action(action=E.CZYTANIE_ZAKUPY_PRZYROSTOWO, enable_session=False)
+    def daj_bufor_zakupowe(self,  _: KSEFSDK) -> tuple[dict, str]:
+        alist = self.odczytaj_wszystkie_faktury_zakupowe(self)
+        max_data = self.daj_ostatnia_data(alist)
+        msg = f"Liczba zakupowych {len(alist)}, ostatnia data: {max_data if max_data else 'bufor pusty'}"
+        d_list = [d.metadata for d in alist]
+        return {
+            "invoices": d_list,
+            "ostatnia_data": max_data
+        }, msg
+
+    @ksef_action(action=E.UAKTUALNIJ_ZAKUPY_PRZYROSTOWO)
+    def uaktualnij_bufor_zakupowe(self,  K: KSEFSDK) -> tuple[dict, str]:
+        alist = self.odczytaj_wszystkie_faktury_zakupowe(self)
+        max_data = self.daj_ostatnia_data(alist)
+        date_from = _minus_days(
+            60) if max_data is None else _iso_format_to_date(max_data)
+        date_to = _tomorrow()
+        self.logger.info(
+            f"Odczyt faktur zakupowych od {date_from} do {date_to}")
+        liczba_faktur, dir_name = self._czytaj_zbiorczo(K=K, data_od=date_from,
+                                                        data_do=date_to, subject=KSEFSDK.SUBJECT2)
+
+        def _wynik(liczba_faktur: int) -> tuple[dict, str]:
+            mess = f"Znaleziono {liczba_faktur} nowych faktur w okresie {date_from} - {date_to} dla subject {KSEFSDK.SUBJECT2}"
+            return {
+                "liczba_faktur": liczba_faktur
+            }, mess
+        if liczba_faktur == 0:
+            return _wynik(0)
+        nlist = self.uaktualnij_faktury(self, alist, dir_name)
+        return _wynik(len(nlist))
+
+    @ksef_action(action=E.WEZ_FAKTURA_BUFOR, enable_session=False)
+    def wez_bufor_faktura(self,  _: KSEFSDK, ksef_number: str) -> tuple[dict, str]:
+        faktura_path = self.daj_faktura_zakupowa_path(self, ksef_number)
+        return {
+            "faktura_path": faktura_path
+        }, f"Faktura {ksef_number} z bufora zakupowego"
