@@ -1,3 +1,6 @@
+## Wersja 1.1.5 Data: 2026/04/21
+* Dodanie przyrostowego odczytywania faktur zakupowych
+
 ## Wersja 1.1.4 Data: 2026/04/04
 * Dodanie środowiska do daj_konfiguracje
 
