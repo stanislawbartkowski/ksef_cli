@@ -127,6 +127,22 @@ Przykładowy fragment pliku events.csv
 2025-12-16T20:58:32.052180,2025-12-16T20:58:35.711541,3.66,2,Wyślij fakture do KSeF,FAIL,Nieprawidłowy zakres uprawnień Kontekst 7497725064 nie jest uprawniony do wystawienia faktury w imieniu sprzedawcy (NIP: 7952809480),7497725064,
 2025-12-16T20:58:36.123971,2025-12-16T20:58:38.096498,1.97,1,Czytanie faktur zakupowych,OK,,7497725064,2025-12-11 - 2025-12-18
 ```
+## Przyrostowe odczytywanie faktur zakupowych
+
+Dostępne są trzy dodatkowe funkcjonalności, bardziej szczegółowy opis w sekcji *Operacje*
+
+* daj_zakupowe_bufor Odczytuje listę metadanych aktualnie zapisanych z buforze
+* uaktualnij_zakupowe_bufor Uaktualnia bufor o faktury,które się pojawiły od poprzedniej aktualizacji
+* wez_faktura_bufor Ścieżka dostęu do faktury zakupowej XML w buforze
+
+Faktury zakupowe są zapisywane w katalogu {KSEFDIR}-zakupowe - ścieżka wskazywana przez zmienną KSEFDIR z dodanym przyrostkiem -zakupowe.<br>
+Każda faktura zakupowa jest trzymana w osobnym katalogu z zawierającym dwa pliki:<br>
+* {KSEF-DIR}-zakupowe
+  * \/numer nip\/
+    * \/numer ksef\/
+      * faktura.xml Faktura KSeF jako XML
+      * metadane.json Dane z opisem faktury w formacie JSON
+     
 ## Operacje
 
 Wywołanie:
@@ -279,6 +295,42 @@ Zwraca w plik_na_wynik
     * log_file, ścieżka do pliku z logami tworzonymi w trakcie wykonywania operacji
     * events_file, ścieżka do pliku z dziennikiem operacji dla danego NIP
 
+## daj_zakupowe_bufor
+
+Odczytuje aktualną zawartość bufora faktur zakupowych z katalogu {KSEFDIR}-zakupowe. Odczytywane są pliki metadata.json dla każdej faktury, nie jest tutaj nawiązywana komunikacja z systemem KSeF 2.0
+
+> python -m ksef_cli daj_zakupowe_bufor  \<nip\> <plik_na_wynik>
+
+Zwraca w plik_na_wynik
+  * OK: true/false
+  * errmess
+  * invoices Lista metadada.json faktur zakupowych znajdujących się w buforze. UWAGA: zwracane są metadata.json. Fakturę w postaci XML należy odczytać za pomocą wywołania wez_faktura_bufor
+  * ostatnia_data Data (timestamp) najpóźniejszej faktury znajdującej sie w buforze
+
+## uaktualnij_zakupowe_bufor
+
+Aktualizuje bufor faktur zakupowych o nowe faktury. Możliwe są dwa przypadki:
+* Bufor jest pusty. Odczytywane są faktury z zakresu 2 miesiące wstecz do daty dzisiejszej
+* Bufor zawiera faktury. Odczytywane są faktury z KSeF od najpóźniejszej daty faktury z bufora do daty dzisiejszej. Dodawane są tylko nowe faktury, jeśli w odczytane faktury z KSeF nakładają się na istniejące w buforze, to takie faktury są pomijane.
+
+> python -m ksef_cli uaktualnij_zakupowe_bufor  \<nip\> <plik_na_wynik>
+
+Zwraca w plik_na_wynik
+  * OK: true/false
+  * errmess
+  * liczba_faktur Liczba nowo znalezionych faktur. Liczba może być równa 0, jeśi nic sie nie zmieniło od ostatniej aktualizacji
+
+## wez_faktura_bufor
+
+Zwraca ścieżkę dostępu do pliku XML z fakturą KSeF
+
+> python -m ksef_cli wez_faktura_bufor  \<nip\> <plik_na_wynik>
+
+Zwraca w plik_na_wynik
+  * OK: true/false
+  * errmess
+  * faktura_path Ścieżka dostępu do pliku XML z zawartością faktury zakupowej KSeF w buforze.
+  
 
 ## Przykładowe wywołanie
 > export KSEFCONF=/ścieżka/ <br>
