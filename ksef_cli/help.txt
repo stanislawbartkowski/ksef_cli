@@ -93,7 +93,7 @@ daj_konfiguracje
   Zwraca w plik_na_wynik
     OK: true/false
     errmess
-    auth: Metoda authentykcji, token lub certyfikat
+    auth: Metoda autentykacji, token lub certyfikat
     mess: Komunikat, NIP jest lub nie jest skonfigurowany
 
 daj_zakupowe_bufor
