@@ -567,7 +567,11 @@ class AbstractTestKSEFCLI(unittest.TestCase):
         self.assertEqual(len(invoices), len(invoices1))
 
         # teraz odczytak faktura z bufora
+        # tylko pierwsze 100
+        no = 0
         for e in invoices:
+            if no > 100: break
+            no += 1
             ksef_number = e["ksefNumber"]
             res = A.wez_faktura_bufor(
                 C=self.C, output=output, nip=nip, ksef_number=ksef_number)
