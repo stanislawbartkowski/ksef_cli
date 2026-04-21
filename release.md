@@ -1,3 +1,6 @@
+## Wersja 1.1.5r1 Data: 2026/04/22
+* Tomorrow - jest tworzone przez dodanie 2 dni, może być problem z różnymi strefami czasowymi
+
 ## Wersja 1.1.5 Data: 2026/04/21
 * Dodanie przyrostowego odczytywania faktur zakupowych
 
