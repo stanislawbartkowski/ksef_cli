@@ -16,8 +16,6 @@ Akcje:
   uaktualnij_zakupowe_bufor Ukatualnij bufor faktur zakupowych
   wez_faktura_bufor Podaj ścieżke do faktury zakupowej
 
-
-
 Nip:
   Numer NIP użytkownika KSeF 2.0. NIP musi mieć odpowiednik z pliku konfiguracyjnym
 
