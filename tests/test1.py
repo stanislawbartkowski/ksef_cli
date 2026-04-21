@@ -520,6 +520,18 @@ class AbstractTestKSEFCLI(unittest.TestCase):
         res = A.daj_bufor_zakupowe(C=self.C, output=output, nip=nip)
         print(res)
 
+    def _test_uaktualnij_bufor_zakupowe_zero(self, A: AKsefCli):
+        nip = T.NIP_NABYWCADIR
+        output = T.temp_ojosn()
+        # wyczysc dane
+        A.wyczysc_dane(C=self.C, output=output, nip=nip)
+        res = A.uaktualnij_bufor_zakupowe(C=self.C, output=output, nip=nip)
+        print(res)
+        # jeszcze raz - powinno być 0
+        res = A.uaktualnij_bufor_zakupowe(C=self.C, output=output, nip=nip)
+        print(res)
+        self.assertIn("0 nowych faktur", res[1])
+
     def _test_uaktualnij_bufor_zakupowe(self, A: AKsefCli):
         nip = T.NIP_NABYWCADIR
         output = T.temp_ojosn()
@@ -602,7 +614,8 @@ class AbstractTestKSEFCLI(unittest.TestCase):
         self.assertEqual(len(invoices) + 1, len(invoices1))
 
         # wyszukaj nową fakturę
-        faktura = next(f for f in invoices1 if f["invoiceNumber"] == invoice_num)
+        faktura = next(
+            f for f in invoices1 if f["invoiceNumber"] == invoice_num)
         print(faktura)
 
 
@@ -815,6 +828,9 @@ class TestKSEFCliMain(TokenKsefCO, AbstractTestKSEFCLI):
 
     def test_wez_bufor_zakupowe(self):
         self._test_wez_bufor_zakupowe(self.AM)
+
+    def test_uaktualnij_bufor_zakupowe_zero(self):
+        self._test_uaktualnij_bufor_zakupowe_zero(self.AM)
 
     def test_uaktualnij_bufor_zakupowe(self):
         self._test_uaktualnij_bufor_zakupowe(self.AM)

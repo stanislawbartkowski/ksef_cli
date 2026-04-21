@@ -21,7 +21,7 @@ from .readp12 import read_cert
 
 def _tomorrow() -> str:
     today = date.today()
-    t = timedelta(days=2)
+    t = timedelta(days=1)
     tomorrow = today + t
     return tomorrow.isoformat()
 
