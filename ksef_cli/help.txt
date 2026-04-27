@@ -1,7 +1,7 @@
 Wywołanie:
   python -m ksef_cli <akcja> <nip> <plik_na_wynik> <dodatkowe_parametry>
 
-Wersja 1.1.5r1 z dnia 22 kwietnia 2026 roku.
+Wersja 1.1.5r2 z dnia 27 kwietnia 2026 roku.
 
 Akcje:
   wyslij_fakture Wysłanie faktury do system KSeF 2.0
@@ -14,7 +14,7 @@ Akcje:
   pobierz_zbiorczo Odczytaj zbiorczo paczkę faktur
   daj_zakupowe_bufor Odczytaj faktury zakupowe z bufora zakupowych
   uaktualnij_zakupowe_bufor Ukatualnij bufor faktur zakupowych
-  wez_faktura_bufor Podaj ścieżke do faktury zakupowej
+  wez_faktura_bufor Podaj ścieżkę do faktury zakupowej
 
 Nip:
   Numer NIP użytkownika KSeF 2.0. NIP musi mieć odpowiednik z pliku konfiguracyjnym

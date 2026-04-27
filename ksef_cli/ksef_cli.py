@@ -5,6 +5,7 @@ import tempfile
 from typing import Callable
 from requests import HTTPError
 from datetime import date, timedelta, datetime
+from dateutil.parser import parse
 
 import xml.etree.ElementTree as et
 import zipfile
@@ -34,7 +35,9 @@ def _minus_days(minus_days: int) -> str:
 
 
 def _iso_format_to_date(s: str) -> str:
-    d = datetime.fromisoformat(s)
+    # d = datetime.fromisoformat(s)
+    # use parse to be compatible with python 3.10
+    d = parse(s)
     return d.date().isoformat()
 
 
