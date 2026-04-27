@@ -1,3 +1,6 @@
+## Wersja 1.1.5r2 Data: 2026/04/27
+* Python 3.10 - zastąpienie datetime.fromisoformat(s) przez parse(s) to zachować kompatybilność z Python 3.10
+
 ## Wersja 1.1.5r1 Data: 2026/04/22
 * Tomorrow - jest tworzone przez dodanie 2 dni, może być problem z różnymi strefami czasowymi
 
