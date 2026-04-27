@@ -570,7 +570,8 @@ class AbstractTestKSEFCLI(unittest.TestCase):
         # tylko pierwsze 100
         no = 0
         for e in invoices:
-            if no > 100: break
+            if no > 100:
+                break
             no += 1
             ksef_number = e["ksefNumber"]
             res = A.wez_faktura_bufor(
@@ -621,6 +622,31 @@ class AbstractTestKSEFCLI(unittest.TestCase):
         faktura = next(
             f for f in invoices1 if f["invoiceNumber"] == invoice_num)
         print(faktura)
+
+    def _test_wyslij_zduplikowana_fakture(self, A: AKsefCli):
+        nip = T.NIPDIR
+        fa = T.FAKTURA_WZORZEC
+        invoice_path = T.prepare_invoice(fa)
+        output = T.temp_ojosn()
+        res = A.wyslij_fakture(C=self.C, output=output,
+                               nip=nip, invoice_path=invoice_path)
+        print(res)
+        self.assertTrue(res[0])
+        d = _wez_res(output)
+        print(d)
+        numer_ksef = d["numer_ksef"]
+        print(numer_ksef)
+
+        # teraz wysylam drugi raz
+        res = A.wyslij_fakture(C=self.C, output=output,
+                               nip=nip, invoice_path=invoice_path)
+        print(res)
+        self.assertFalse(res[0])
+        self.assertTrue("Duplikat faktury" in res[1] or "Błąd weryfikacji" in res[1])
+        d = _wez_res(output)
+        print(d)
+
+
 
 
 class TestKSEFCli(TokenKsefCO, AbstractTestKSEFCLI):
@@ -842,6 +868,9 @@ class TestKSEFCliMain(TokenKsefCO, AbstractTestKSEFCLI):
     def test_bufor_zakupowe_wez_jeden(self):
         self._test_bufor_zakupowe_wez_jeden(self.AM)
 
+    def test_wyslij_zduplikowana_fakture(self):
+        self._test_wyslij_zduplikowana_fakture(self.AM)
+
 
 class TestKSEFWsadowe(TokenKsefCO, AbstractTestKSEFCLI):
 
@@ -881,6 +910,9 @@ class TestKSEFWsadowoMain(TokenKsefCO, AbstractTestKSEFCLI):
 
     def test_faktura_zakupowa(self):
         self._test_faktura_zakupowa(self.AW)
+
+    def test_wyslij_zduplikowana_fakture(self):
+        self._test_wyslij_zduplikowana_fakture(self.AW)
 
 
 class TestKSEFWsadowoDuzoFaktur(unittest.TestCase):

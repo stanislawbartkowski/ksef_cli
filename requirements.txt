@@ -1,2 +1,2 @@
-git+https://github.com/stanislawbartkowski/ksef_pyth.git
+ksef2.0-python
 pyyaml
