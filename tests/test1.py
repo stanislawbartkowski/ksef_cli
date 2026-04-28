@@ -884,7 +884,8 @@ class TestKSEFWsadowe(TokenKsefCO, AbstractTestKSEFCLI):
     AW = TestWsadowoKsefCli()
 
     def test_wyslij_bledna_fakture(self):
-        self._test_wyslij_bledna_fakture(self.AW, errmess_contains="Nieprawidłowy zakres uprawnień")
+        self._test_wyslij_bledna_fakture(
+            self.AW, errmess_contains="Duplikat faktury")
 
     def test_wyslij_fakture_sprzedazy(self):
         return self._test_wyslij_fakture_sprzedazy(self.AW)
@@ -904,7 +905,8 @@ class TestKSEFWsadowoMain(TokenKsefCO, AbstractTestKSEFCLI):
     AW = TestWsadowoMainKsefCli()
 
     def test_wyslij_bledna_fakture(self):
-        self._test_wyslij_bledna_fakture(self.AW,errmess_contains="Nieprawidłowy zakres")
+        self._test_wyslij_bledna_fakture(
+            self.AW, errmess_contains="Duplikat faktury")
 
     def test_wyslij_fakture_sprzedazy(self):
         return self._test_wyslij_fakture_sprzedazy(self.AW)
