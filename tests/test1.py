@@ -128,6 +128,9 @@ def _wynik_wsadowo(output, ok, errmsg) -> tuple[bool, str]:
         "errmess": i["msg"],
         "numer_ksef": i["ksefNumber"]
     }
+    ok = i["ok"]
+    if not ok:
+        errmsg = i["msg"]
     with open(output, "w") as f:
         json.dump(d, f)
     return ok, errmsg
@@ -881,7 +884,7 @@ class TestKSEFWsadowe(TokenKsefCO, AbstractTestKSEFCLI):
     AW = TestWsadowoKsefCli()
 
     def test_wyslij_bledna_fakture(self):
-        self._test_wyslij_bledna_fakture(self.AW)
+        self._test_wyslij_bledna_fakture(self.AW, errmess_contains="Nieprawidłowy zakres uprawnień")
 
     def test_wyslij_fakture_sprzedazy(self):
         return self._test_wyslij_fakture_sprzedazy(self.AW)
@@ -901,7 +904,7 @@ class TestKSEFWsadowoMain(TokenKsefCO, AbstractTestKSEFCLI):
     AW = TestWsadowoMainKsefCli()
 
     def test_wyslij_bledna_fakture(self):
-        self._test_wyslij_bledna_fakture(self.AW)
+        self._test_wyslij_bledna_fakture(self.AW,errmess_contains="Nieprawidłowy zakres")
 
     def test_wyslij_fakture_sprzedazy(self):
         return self._test_wyslij_fakture_sprzedazy(self.AW)
