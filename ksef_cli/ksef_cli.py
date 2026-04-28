@@ -286,7 +286,7 @@ class KSEFCLI(LOGGER, KSEF_ZAKUPOWE_HELPER):
         ok, err_mess, invoices = K.send_batch_session_bytes(
             payload=bytes_generator(), wez_upo=_zapisz_upo)
         os.unlink(t.name)
-        if not ok:
+        if not ok and not invoices:
             raise ValueError(err_mess)
 
         # zapamiętaj źrodłowe faktury

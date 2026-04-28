@@ -641,12 +641,16 @@ class AbstractTestKSEFCLI(unittest.TestCase):
         res = A.wyslij_fakture(C=self.C, output=output,
                                nip=nip, invoice_path=invoice_path)
         print(res)
-        self.assertFalse(res[0])
-        self.assertTrue("Duplikat faktury" in res[1] or "Błąd weryfikacji" in res[1])
+        ok = res[0]
+        msg = res[1]
+        if not ok:
+            self.assertIn("Duplikat faktury", msg)
+        else:
+            self.assertIn("błędnych 1", msg)
         d = _wez_res(output)
         print(d)
-
-
+        self.assertFalse(d["OK"])
+        self.assertIn("Duplikat faktury", d["errmess"])
 
 
 class TestKSEFCli(TokenKsefCO, AbstractTestKSEFCLI):
@@ -931,18 +935,18 @@ class TestKSEFWsadowoDuzoFaktur(unittest.TestCase):
     # wygląda, że w wersji testowej można maksymalnie wysłać 10 faktur
     NO = 10
 
-    def _przygotuj_paczke(self):
+    def _przygotuj_paczke(self, no):
         T.temp_dir_remove_xml()
         invoices = []
         fa = T.FAKTURA_WZORZEC
-        for i in range(self.NO):
+        for i in range(no):
             faktura = f'faktura{i}.xml'
             _, invoice = T.prepare_invoice_faktur(patt=fa, faktura=faktura)
             invoices.append(invoice)
         return invoices
 
-    def test_wysylka_wiele_faktur(self):
-        invoices_names = self._przygotuj_paczke()
+    def test_wysylka_wiele_faktur(self, no=NO):
+        invoices_names = self._przygotuj_paczke(no)
         nip = T.NIP
         tmp_dir = T.temp_dir()
         output = T.temp_ojosn()
@@ -953,7 +957,7 @@ class TestKSEFWsadowoDuzoFaktur(unittest.TestCase):
             d = json.load(fp=f)
 
         invoices = d.get("invoices", [])
-        self.assertEqual(self.NO, len(invoices))
+        self.assertEqual(no, len(invoices))
         cli = KSEFCLI(self.C, nip)
         for i in invoices:
             print(i)
@@ -970,3 +974,22 @@ class TestKSEFWsadowoDuzoFaktur(unittest.TestCase):
             with open(upo, "r") as f:
                 upo_xml = f.read()
                 et.fromstring(upo_xml)
+        return invoices_names
+
+    def test_wysyla_wiele_zduplikowane(self):
+        self.test_wysylka_wiele_faktur(no=1)
+        # wyslij drugi raz
+        nip = T.NIP
+        tmp_dir = T.temp_dir()
+        output = T.temp_ojosn()
+        argv = ["", "wyslij_wsadowo", nip, output, tmp_dir]
+        ok, errmsg = _run_main_res(argv, output)
+        self.assertTrue(ok)
+        with open(output, "r") as f:
+            d = json.load(fp=f)
+
+        invoices = d.get("invoices", [])
+        print(invoices)
+        i = invoices[0]
+        self.assertFalse(i["ok"])
+        self.assertIn("Duplikat faktury", i["msg"])
