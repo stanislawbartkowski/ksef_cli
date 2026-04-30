@@ -8,6 +8,9 @@
   [tool.setuptools.package-data]                                                                                                                                                                                                                           
   "ksef_cli" = ["help.txt"]                                                                                                                                                                                                                                
 
+  [project.urls]
+  Repository = "https://github.com/stanislawbartkowski/ksef_cli"
+  
   [project]
   name = "ksef2.0_cli"
   version = "1.1.5r3"                                                                                                                                                                                                                                          
