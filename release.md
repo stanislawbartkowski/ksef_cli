@@ -1,3 +1,6 @@
+## Wersja 1.1.5r4 Data: 2026/05/01
+* Small refactoring after Claude review
+
 ## Wersja 1.1.5r2 Data: 2026/04/27
 * Python 3.10 - zastąpienie datetime.fromisoformat(s) przez parse(s) to zachować kompatybilność z Python 3.10
 
