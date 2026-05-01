@@ -4,7 +4,7 @@ import shutil
 import tempfile
 from typing import Callable
 from requests import HTTPError
-from datetime import date, timedelta, datetime
+from datetime import date, timedelta
 from dateutil.parser import parse
 
 import xml.etree.ElementTree as et
@@ -358,7 +358,10 @@ class KSEFCLI(LOGGER, KSEF_ZAKUPOWE_HELPER):
                                                         data_do=date_to, subject=KSEFSDK.SUBJECT2)
 
         def _wynik(liczba_faktur: int) -> tuple[dict, str]:
-            mess = f"Znaleziono {liczba_faktur} nowych faktur w okresie {date_from} - {date_to} dla subject {KSEFSDK.SUBJECT2}"
+            mess = (
+                f"Znaleziono {liczba_faktur} nowych faktur "
+                f"w okresie {date_from} - {date_to} dla subject {KSEFSDK.SUBJECT2}"
+            )
             return {
                 "liczba_faktur": liczba_faktur
             }, mess

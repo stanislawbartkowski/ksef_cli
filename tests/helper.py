@@ -63,9 +63,9 @@ def temp_dir() -> str:
 def temp_dir_remove_xml():
     tmp_dir = temp_dir()
     l_dir = os.listdir(tmp_dir)
-    for l in l_dir:
-        if l.endswith(".xml"):
-            full_path = os.path.join(tmp_dir, l)
+    for fname in l_dir:
+        if fname.endswith(".xml"):
+            full_path = os.path.join(tmp_dir, fname)
             os.unlink(full_path)
 
 

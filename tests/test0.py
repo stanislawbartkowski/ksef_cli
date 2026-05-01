@@ -25,4 +25,3 @@ class TestKSEFCLI_ERROR(unittest.TestCase):
         res = cli.czytaj_faktury_zakupowe(output=output, data_od=d_from, data_do=d_to)
         print(res)
         self.assertTrue(res[0])  # Expecting success
-        

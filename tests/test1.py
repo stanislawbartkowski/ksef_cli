@@ -53,7 +53,9 @@ class AKsefCli:
         raise NotImplementedError
 
     @staticmethod
-    def odczytaj_faktury_zbiorczo(C: CONF, output: str, nip: str, data_od: str, data_do: str, subject: str) -> tuple[bool, str]:
+    def odczytaj_faktury_zbiorczo(
+            C: CONF, output: str, nip: str,
+            data_od: str, data_do: str, subject: str) -> tuple[bool, str]:
         raise NotImplementedError
 
     @staticmethod
@@ -103,7 +105,9 @@ class TestKsefCli(AKsefCli):
             output=output, data_od=data_od, data_do=data_do)
 
     @staticmethod
-    def odczytaj_faktury_zbiorczo(C: CONF, output: str, nip: str, data_od: str, data_do: str, subject: str) -> tuple[bool, str]:
+    def odczytaj_faktury_zbiorczo(
+            C: CONF, output: str, nip: str,
+            data_od: str, data_do: str, subject: str) -> tuple[bool, str]:
         cli = KSEFCLI(C, nip)
         return cli.czytaj_faktury_zbiorczo(
             output=output, data_od=data_od, data_do=data_do, subject=subject)
@@ -190,7 +194,9 @@ class TestKsefCliMain(AKsefCli):
         return _run_main_res(argv, output)
 
     @staticmethod
-    def odczytaj_faktury_zbiorczo(C: CONF, output: str, nip: str, data_od: str, data_do: str, subject: str) -> tuple[bool, str]:
+    def odczytaj_faktury_zbiorczo(
+            C: CONF, output: str, nip: str,
+            data_od: str, data_do: str, subject: str) -> tuple[bool, str]:
         argv = ["", "pobierz_zbiorczo", nip, output, data_od, data_do, subject]
         return _run_main_res(argv, output)
 
