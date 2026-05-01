@@ -10,6 +10,7 @@
 
   [project.urls]
   Repository = "https://github.com/stanislawbartkowski/ksef_cli"
+  Changelog = "https://github.com/stanislawbartkowski/ksef_cli/blob/main/release.md"
   
   [project]
   name = "ksef2.0_cli"
