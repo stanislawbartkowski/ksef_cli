@@ -340,5 +340,5 @@ Zwraca w plik_na_wynik
 ## Dev environment, happy coding
 > source .venv/bin/activate<br>
 > git clone https://github.com/stanislawbartkowski/ksef_cli.git<br>
-> pip install -r requirements.txt<br>
+> pip install -e ".[dev]"<br>
 > code .<br>

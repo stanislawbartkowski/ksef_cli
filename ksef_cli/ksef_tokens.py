@@ -9,7 +9,8 @@ from .ksef_conf import CONF
 _env = {
     'prod': KSEFSDK.PRODKSEF,
     'test': KSEFSDK.DEVKSEF,
-    'demo': KSEFSDK.PREKSEF
+    'demo': KSEFSDK.PREKSEF,
+    'unittest': KSEFSDK.UNITTEST
 }
 
 TOKEN = namedtuple(
