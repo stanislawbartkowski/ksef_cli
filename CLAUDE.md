@@ -13,13 +13,16 @@ KSeF CLI is a command-line tool and Python package for interacting with KSeF 2.0
 pip install -e ".[dev]"
 
 # Run all tests
-python -m unittest discover tests
+pytest
 
 # Run a single test file
-python -m unittest tests.test1
+pytest tests/test1.py
 
 # Run a single test case
-python -m unittest tests.test1.TestKSEFCli.test_wyslij_fakture
+pytest tests/test1.py::TestKSEFCombined::test_wyslij_fakture_sprzedazy
+
+# Run a parametrized variant
+pytest tests/test1.py::TestKSEFCombined::test_wyslij_fakture_sprzedazy[token]
 
 # Lint
 ruff check .
@@ -80,7 +83,7 @@ tokens:
     env: prod
 ```
 
-Environments map to KSeF endpoints: `prod` → production, `demo` → PREKSEF, `test` → DEVKSEF.
+Environments map to KSeF endpoints: `prod` → production, `demo` → PREKSEF, `test` → DEVKSEF, `unittest` → UNITTEST.
 
 ### Logging (`ksef_log.py`)
 
@@ -94,4 +97,18 @@ Implements incremental sync: tracks the last fetched KSeF sequence number in `KS
 
 ### Test Structure
 
-Tests use `unittest` and require a live KSeF test environment. The abstract class `AbstractTestKSEFCLI` in `test1.py` defines 30+ test scenarios; `TestKSEFCli` and `TestKSEFCliCert` extend it for token and certificate auth respectively. `TestKSEFCliMain` tests the full CLI path via `run_main()`. Test configs live in `tests/conf/` and sample XML invoices in `tests/testdata/`.
+Tests use **pytest** and require a live KSeF test environment. Test configs live in `tests/conf/` and sample XML invoices in `tests/testdata/`.
+
+**Shared infrastructure (`ksef_test_base.py`)** — not collected by pytest:
+- `AKsefCli` — abstract adapter interface with static methods for each CLI operation.
+- Concrete adapters: `TestKsefCli` (direct SDK), `TestKsefCliMain` (via `run_main()`), `TestWsadowoKsefCli` / `TestWsadowoMainKsefCli` (batch submission).
+- `AbstractTestKSEFCLI` — mixin with `_test_*` helper methods that implement the actual assertion logic; subclasses call these with a chosen adapter.
+
+**`test0.py`** — standalone error/auth tests (no live session required for the first two).
+
+**`test1.py`** — `TestKSEFCombined`: single class parametrized over three adapters (`token`, `cert`, `main`). Tests that only apply to a subset use `pytest.skip()` guarded by flags on the `_KSEFConf` dataclass (`is_token`, `is_main`, `has_zbiorowy`).
+
+**`test2.py`** — remaining test classes:
+- `TestKSEFCliCertNIPDIR` — cert auth with `NIP$SUBDIR` path patterns.
+- `TestKSEFWsadowe` / `TestKSEFWsadowoMain` — batch submission via SDK and CLI.
+- `TestKSEFWsadowoDuzoFaktur` — bulk invoice submission (up to 10 invoices).
