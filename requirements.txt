@@ -1,3 +1,0 @@
-ksef2.0-python
-pyyaml
-python-dateutil

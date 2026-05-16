@@ -6,7 +6,4 @@ a1
 tests/worktemp-zakupowe/*
 dist/ksef2_0_cli-1.1.1-py3-none-any.whl
 dist/ksef2_0_cli-1.1.1.tar.gz
-ksef2.0_cli.egg-info/dependency_links.txt
-ksef2.0_cli.egg-info/PKG-INFO
-ksef2.0_cli.egg-info/SOURCES.txt
-ksef2.0_cli.egg-info/top_level.txt
+ksef2.0_cli.egg-info/

@@ -1,2 +1,0 @@
-ksef2.0-python
-pyyaml

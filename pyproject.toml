@@ -25,4 +25,16 @@
     "pyyaml",
     "python-dateutil"
   ]                                                                                                                                                                                                                                                        
-  readme = "README.md" 
+  readme = "README.md"
+
+[project.optional-dependencies]
+dev = ["pytest", "ruff"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["tests"]
+python_files = ["test*.py"]
+
+[tool.ruff]
+line-length = 120
+exclude = [".venv"]
