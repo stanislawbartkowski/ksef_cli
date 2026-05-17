@@ -296,7 +296,8 @@ class KSEFCLI(LOGGER, KSEF_ZAKUPOWE_HELPER):
         except Exception as e:
             errmess = f"Połączenie z KSeF 2.0 nie jest skonfigurawane dla {nip.nip}"
             mess = "Nie jest skonfigurowane"
-            self.logger.warning(errmess, e)
+            self.logger.warning(errmess)
+            self.logger.exception(e)
             ok = False
         res = {
             "auth": auth,
