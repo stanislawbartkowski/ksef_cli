@@ -1,3 +1,7 @@
+## Wersja 1.1.6 Data: 2026/05/17
+* Refactoring: zastąpienie flake8 ruff
+* Zamiana unittest na pytest
+
 ## Wersja 1.1.5r4 Data: 2026/05/01
 * Small refactoring after Claude review
 
