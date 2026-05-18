@@ -1,3 +1,6 @@
+## Wersja 1.1.6r1 Data: 2026/05/18
+* Dodanie testu z zamianą linii dla KSeF
+
 ## Wersja 1.1.6 Data: 2026/05/17
 * Refactoring: zastąpienie flake8 ruff
 * Zamiana unittest na pytest

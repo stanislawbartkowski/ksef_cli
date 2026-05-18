@@ -22,7 +22,6 @@ def _run_main_res(argv: list[str], output: str) -> tuple[bool, str]:
 
 
 class AKsefCli:
-
     @staticmethod
     def wyczysc_dane(C: CONF, output: str, nip: str) -> tuple[bool, str]:
         raise NotImplementedError
@@ -49,8 +48,8 @@ class AKsefCli:
 
     @staticmethod
     def odczytaj_faktury_zbiorczo(
-            C: CONF, output: str, nip: str,
-            data_od: str, data_do: str, subject: str) -> tuple[bool, str]:
+        C: CONF, output: str, nip: str, data_od: str, data_do: str, subject: str
+    ) -> tuple[bool, str]:
         raise NotImplementedError
 
     @staticmethod
@@ -71,7 +70,6 @@ class AKsefCli:
 
 
 class TestKsefCli(AKsefCli):
-
     @staticmethod
     def odczytaj_faktury_zakupowe(C: CONF, output: str, nip: str, data_od: str, data_do: str) -> tuple[bool, str]:
         cli = KSEFCLI(C, nip)
@@ -99,11 +97,10 @@ class TestKsefCli(AKsefCli):
 
     @staticmethod
     def odczytaj_faktury_zbiorczo(
-            C: CONF, output: str, nip: str,
-            data_od: str, data_do: str, subject: str) -> tuple[bool, str]:
+        C: CONF, output: str, nip: str, data_od: str, data_do: str, subject: str
+    ) -> tuple[bool, str]:
         cli = KSEFCLI(C, nip)
-        return cli.czytaj_faktury_zbiorczo(
-            output=output, data_od=data_od, data_do=data_do, subject=subject)
+        return cli.czytaj_faktury_zbiorczo(output=output, data_od=data_od, data_do=data_do, subject=subject)
 
     @staticmethod
     def daj_konfiguracje(C: CONF, output: str, nip: str) -> tuple[bool, str]:
@@ -120,11 +117,7 @@ def _wynik_wsadowo(output, ok, errmsg) -> tuple[bool, str]:
         return ok, errmsg
     assert 1 == len(invoices)
     i = invoices[0]
-    d = {
-        "OK": i["ok"],
-        "errmess": i["msg"],
-        "numer_ksef": i["ksefNumber"]
-    }
+    d = {"OK": i["ok"], "errmess": i["msg"], "numer_ksef": i["ksefNumber"]}
     ok = i["ok"]
     if not ok:
         errmsg = i["msg"]
@@ -134,7 +127,6 @@ def _wynik_wsadowo(output, ok, errmsg) -> tuple[bool, str]:
 
 
 class TestWsadowoKsefCli(TestKsefCli):
-
     @staticmethod
     def wyslij_fakture(C: CONF, output: str, nip: str, invoice_path: str) -> tuple[bool, str]:
         cli = KSEFCLI(C, nip)
@@ -144,7 +136,6 @@ class TestWsadowoKsefCli(TestKsefCli):
 
 
 class TestWsadowoMainKsefCli(TestKsefCli):
-
     @staticmethod
     def wyslij_fakture(C: CONF, output: str, nip: str, invoice_path: str) -> tuple[bool, str]:
         tmp_dir = T.temp_dir()
@@ -154,7 +145,6 @@ class TestWsadowoMainKsefCli(TestKsefCli):
 
 
 class TestKsefCliMain(AKsefCli):
-
     @staticmethod
     def wyczysc_dane(C: CONF, output: str, nip: str) -> tuple[bool, str]:
         argv = ["", "wyczysc_dane", nip, output]
@@ -187,8 +177,8 @@ class TestKsefCliMain(AKsefCli):
 
     @staticmethod
     def odczytaj_faktury_zbiorczo(
-            C: CONF, output: str, nip: str,
-            data_od: str, data_do: str, subject: str) -> tuple[bool, str]:
+        C: CONF, output: str, nip: str, data_od: str, data_do: str, subject: str
+    ) -> tuple[bool, str]:
         argv = ["", "pobierz_zbiorczo", nip, output, data_od, data_do, subject]
         return _run_main_res(argv, output)
 
@@ -214,13 +204,13 @@ class TestKsefCliMain(AKsefCli):
 
 
 class AbstractTestKSEFCLI:
-
     C: CONF
 
     def _test_odczytaj_faktury_zakupowe_brak_nip(self, A: AKsefCli):
         nip = "xxxxxxxxxxxx"
         res, msg = A.odczytaj_faktury_zakupowe(
-            C=self.C, nip=nip, output="xxxxxx", data_od="2023-01-01", data_do="2023-12-31")
+            C=self.C, nip=nip, output="xxxxxx", data_od="2023-01-01", data_do="2023-12-31"
+        )
         assert not res
         print(msg)
         assert "Nie można odczytać tokena KSeF dla NIP" in msg
@@ -228,7 +218,8 @@ class AbstractTestKSEFCLI:
     def _test_odczytaj_faktury_zakupowe_bledy_token(self, A: AKsefCli):
         nip = "888888887"
         res, msg = A.odczytaj_faktury_zakupowe(
-            C=self.C, nip=nip, output="xxxxxx", data_od="2023-01-01", data_do="2023-12-31")
+            C=self.C, nip=nip, output="xxxxxx", data_od="2023-01-01", data_do="2023-12-31"
+        )
         assert not res
         print(msg)
 
@@ -236,8 +227,7 @@ class AbstractTestKSEFCLI:
         d_from, d_to = T.daj_przedzial()
         print(d_from, d_to)
         output = T.temp_ojosn()
-        res = A.odczytaj_faktury_zakupowe(
-            C=self.C, output=output, nip=nip, data_od=d_from, data_do=d_to)
+        res = A.odczytaj_faktury_zakupowe(C=self.C, output=output, nip=nip, data_od=d_from, data_do=d_to)
         print(res)
         assert res[0]
         d = _wez_res(output)
@@ -254,7 +244,7 @@ class AbstractTestKSEFCLI:
         d = _wez_res(output)
         print(d)
         assert d["OK"]
-        invoice = d['invoice']
+        invoice = d["invoice"]
         with open(invoice, mode="r") as f:
             invoice_xml = f.read()
             print(invoice_xml)
@@ -265,8 +255,7 @@ class AbstractTestKSEFCLI:
         print(d_from, d_to)
         nip = T.NIP
         output = T.temp_ojosn()
-        res = A.odczytaj_faktury_sprzedazy(
-            C=self.C, output=output, nip=nip, data_od=d_from, data_do=d_to)
+        res = A.odczytaj_faktury_sprzedazy(C=self.C, output=output, nip=nip, data_od=d_from, data_do=d_to)
         print(res)
         assert res[0]
         d = _wez_res(output)
@@ -345,7 +334,7 @@ class AbstractTestKSEFCLI:
         print(res)
         assert not res[0]
         errmess = res[1]
-        if 'Błąd weryfikacji, brak poprawnych faktur' not in errmess:
+        if "Błąd weryfikacji, brak poprawnych faktur" not in errmess:
             assert "nie jest uprawniony do wystawienia faktury w imieniu" in errmess
 
     def _test_faktura_zakupowa(self, A: AKsefCli, nip=T.NIP_NABYWCA):
@@ -363,7 +352,8 @@ class AbstractTestKSEFCLI:
         date_to = "2024-12-31"
         subject = "Subject1"
         res = A.odczytaj_faktury_zbiorczo(
-            C=self.C, output=output, nip=nip, data_od=date_from, data_do=date_to, subject=subject)
+            C=self.C, output=output, nip=nip, data_od=date_from, data_do=date_to, subject=subject
+        )
         print(res)
         assert not res[0]
         assert "must not exceed 3 months" in res[1]
@@ -375,7 +365,8 @@ class AbstractTestKSEFCLI:
         date_to = "2025-01-31"
         subject = "Subject1"
         res = A.odczytaj_faktury_zbiorczo(
-            C=self.C, output=output, nip=nip, data_od=date_from, data_do=date_to, subject=subject)
+            C=self.C, output=output, nip=nip, data_od=date_from, data_do=date_to, subject=subject
+        )
         print(res)
         assert res[0]
         d = _wez_res(output)
@@ -390,7 +381,8 @@ class AbstractTestKSEFCLI:
         date_to = "2025-12-31"
         subject = "Subject1"
         res = A.odczytaj_faktury_zbiorczo(
-            C=self.C, output=output, nip=nip, data_od=date_from, data_do=date_to, subject=subject)
+            C=self.C, output=output, nip=nip, data_od=date_from, data_do=date_to, subject=subject
+        )
         print(res)
         assert res[0]
         d = _wez_res(output)
@@ -423,7 +415,8 @@ class AbstractTestKSEFCLI:
         date_from, date_to = T.daj_przedzial()
         subject = "Subject1"
         res = A.odczytaj_faktury_zbiorczo(
-            C=self.C, output=output, nip=nip, data_od=date_from, data_do=date_to, subject=subject)
+            C=self.C, output=output, nip=nip, data_od=date_from, data_do=date_to, subject=subject
+        )
         print(res)
         assert res[0]
         d = _wez_res(output)
@@ -574,3 +567,23 @@ class AbstractTestKSEFCLI:
         print(d)
         assert not d["OK"]
         assert "Duplikat faktury" in d["errmess"]
+
+    def _test_wyslij_z_wierszami(self, A: AKsefCli):
+        przyklad = "FA_3_Przykład_9_pattern_linie.xml"
+        invoice_path, invoice = T.prepare_invoice_wiersze(przyklad)
+        print(invoice)
+        nip = T.NIPDIR
+        output = T.temp_ojosn()
+        with open(invoice_path, "r") as f:
+            xml = f.read()
+            print(xml)
+        res = A.wyslij_fakture(C=self.C, output=output, nip=nip, invoice_path=invoice_path)
+        print(res)
+        assert res[0]
+        with open(output, "r") as f:
+            d = json.load(fp=f)
+        print(d)
+        assert d["OK"]
+        f_ksef = d["numer_ksef"]
+        print(f_ksef)
+

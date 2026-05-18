@@ -3,7 +3,7 @@ import datetime
 
 from ksef_cli.ksef_conf import CONF
 
-from xml_konwerter import konwertujdok
+from xml_konwerter import konwertujdok, KONWXML
 
 NIP = "7497725064"
 
@@ -22,19 +22,23 @@ _NIP_NABYWCA = "NIP_NABYWCA"
 _NUMER_FAKTURY = "NUMER_FAKTURY"
 
 
+class FAKTURA(KONWXML):
+    TABLE_TAG = "fakturalinie"
+    TR_TAG = "FaWiersz"
+    REMNOVE_TABLE_TAG = True
+
+
 def _workdir() -> str:
-    return os.path.join(os.path.dirname(__file__), 'worktemp')
+    return os.path.join(os.path.dirname(__file__), "worktemp")
 
 
 def _daj_dir() -> tuple[str, str]:
-    conf_path = os.path.join(os.path.dirname(
-        __file__), 'conf', "kseftokens.yaml")
+    conf_path = os.path.join(os.path.dirname(__file__), "conf", "kseftokens.yaml")
     return conf_path, _workdir()
 
 
 def _daj_dir_cert() -> tuple[str, str]:
-    conf_path = os.path.join(os.path.dirname(
-        __file__), 'conf', "kseftokenscert.yaml")
+    conf_path = os.path.join(os.path.dirname(__file__), "conf", "kseftokenscert.yaml")
     return conf_path, _workdir()
 
 
@@ -79,7 +83,7 @@ def temp_res() -> str:
 
 
 def temp_ojosn():
-    return os.path.join(_workdir(), 'output.json')
+    return os.path.join(_workdir(), "output.json")
 
 
 def _today():
@@ -101,12 +105,7 @@ def prepare_invoice_faktur(patt: str, faktura: str) -> tuple[str, str]:
     inpath = testdatadir(patt)
     outpath = _temp_dir(faktura)
     invoice = _gen_numer_faktury()
-    zmienne = {
-        _DATA_WYSTAWIENIA: _today(),
-        _NIP: NIP,
-        _NIP_NABYWCA: NIP_NABYWCA,
-        _NUMER_FAKTURY: invoice
-    }
+    zmienne = {_DATA_WYSTAWIENIA: _today(), _NIP: NIP, _NIP_NABYWCA: NIP_NABYWCA, _NUMER_FAKTURY: invoice}
     konwertujdok(sou=inpath, dest=outpath, d=zmienne)
     return outpath, invoice
 
@@ -123,3 +122,36 @@ def daj_przedzial() -> tuple[str, str]:
     d_from = d1.strftime("%Y-%m-%d")
     d_to = d2.strftime("%Y-%m-%d")
     return d_from, d_to
+
+
+def prepare_invoice_wiersze(patt, faktura: str = "faktura.xml") -> tuple[str, str]:
+    inpath = testdatadir(patt)
+    outpath = _temp_dir(faktura)
+    invoice = _gen_numer_faktury()
+    zmienne = {_DATA_WYSTAWIENIA: _today(), _NIP: NIP, _NIP_NABYWCA: NIP_NABYWCA, _NUMER_FAKTURY: invoice}
+    linie = [
+        {
+            "NrWierszaFa": "1",
+            "UU_ID": "aaaa111133339990",
+            "P_7": "rata leasingowa za 01/2026",
+            "P_8A": "szt.",
+            "P_8B": "1",
+            "P_9A": "2000",
+            "P_11": "2000",
+            "P_12": "23",
+        },
+        {
+            "NrWierszaFa": "2",
+            "UU_ID": "aaaa111133339991",
+            "P_7": "pakiet ubezpieczeń za 01/2026",
+            "P_8A": "szt.",
+            "P_8B": "1",
+            "P_9A": "300",
+            "P_11": "300",
+            "P_12": "zw",
+        },
+    ]
+    alista = {"linia": linie}
+    htmlkeypairing = [("", "linia")]
+    konwertujdok(sou=inpath, dest=outpath, d=zmienne, alist=alista, htmlkeypairing=htmlkeypairing, KO=FAKTURA)
+    return outpath, invoice

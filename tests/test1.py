@@ -58,7 +58,6 @@ _ADAPTERS = [
 
 @pytest.mark.parametrize("cfg", _ADAPTERS)
 class TestKSEFCombined(AbstractTestKSEFCLI):
-
     @pytest.fixture(autouse=True)
     def _setup(self, cfg):
         self.C = cfg.C
@@ -82,7 +81,7 @@ class TestKSEFCombined(AbstractTestKSEFCLI):
         token = odczytaj_tokny(self.C, "888888887")
         print(token)
         assert token.env == 0
-        assert token.token == 'xxxxxxxxxxxx'
+        assert token.token == "xxxxxxxxxxxx"
 
     def test_usun_katalog_roboczy(self, cfg):
         if not cfg.is_token:
@@ -171,3 +170,6 @@ class TestKSEFCombined(AbstractTestKSEFCLI):
         if not cfg.is_main:
             pytest.skip("main adapter only")
         self._test_wyslij_zduplikowana_fakture(self.A)
+
+    def test_wyslij_z_wierszami(self, cfg):
+        self._test_wyslij_z_wierszami(self.A)

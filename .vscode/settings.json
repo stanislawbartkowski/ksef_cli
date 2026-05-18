@@ -8,6 +8,7 @@
         "-p",
         "test*.py"
     ],
+    "python.testing.pytestArgs": ["-s"],
     "python.testing.pytestEnabled": true,
     "python.testing.unittestEnabled": false,
     "terminal.integrated.env.osx": {
