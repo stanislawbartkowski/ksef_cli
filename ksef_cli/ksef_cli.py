@@ -16,8 +16,12 @@ from ksef_cli.ksef_zakupowe import KSEF_ZAKUPOWE_HELPER
 
 from .ksef_log import LOGGER, E
 from .ksef_conf import CONF, NIP
-from .ksef_tokens import odczytaj_tokny, TOKEN, is_cert
-from .readp12 import read_cert
+from .credentials import (
+    Credentials,
+    add_cert_credentials,
+    add_token_credentials,
+    load_credentials,
+)
 
 
 def _tomorrow() -> str:
@@ -41,17 +45,6 @@ def _iso_format_to_date(s: str) -> str:
     return d.date().isoformat()
 
 
-def _daj_cert(conf_path: str, t: TOKEN) -> tuple[bytes, bytes]:
-    path_p12 = t.p12
-    password = t.password
-    head, _ = os.path.split(path_p12)
-    if head == "":
-        # ścieżka względna do pliku konfiguracyjnego
-        conf_dir = os.path.dirname(conf_path)
-        path_p12 = os.path.join(conf_dir, path_p12)
-    return read_cert(file_path=path_p12, password=password)
-
-
 class KSEFCLI(LOGGER, KSEF_ZAKUPOWE_HELPER):
     @staticmethod
     def ksef_action(action: int, enable_session=True):
@@ -61,7 +54,7 @@ class KSEFCLI(LOGGER, KSEF_ZAKUPOWE_HELPER):
                 try:
                     self.logger.info(f"Czytanie konfiguracji z pliku {self.C.ksef_conf_path}")
                     nip: NIP = self.nip
-                    token: TOKEN = odczytaj_tokny(self.C, nip.nip)
+                    cred: Credentials = load_credentials(self.C, nip.nip)
                 except Exception as e:
                     errmess = f"Nie można odczytać tokena KSeF dla NIP {nip.nip}"
                     EV.koniec(res=False, errmess=errmess)
@@ -69,17 +62,17 @@ class KSEFCLI(LOGGER, KSEF_ZAKUPOWE_HELPER):
                     self.logger.exception(e)
                     return False, errmess
                 try:
-                    if is_cert(token):
-                        key, cert = _daj_cert(self.C.ksef_conf_path, token)
+                    if cred.is_cert():
+                        key, cert = cred.get_cert()
                         # autentykacja certyfikatem
                         K = (
-                            KSEFSDK.initsdkcert(env=token.env, nip=token.nip, p12pk=key, p12pc=cert)
+                            KSEFSDK.initsdkcert(env=cred.env, nip=cred.nip, p12pk=key, p12pc=cert)
                             if enable_session
                             else None
                         )
                     else:
                         # autentykacja tokenem
-                        K = KSEFSDK.initsdk(env=token.env, nip=token.nip, token=token.token) if enable_session else None
+                        K = KSEFSDK.initsdk(env=cred.env, nip=cred.nip, token=cred.get_token()) if enable_session else None
                     res_dict, mess = func(self, K, **kwargs)
                     if K:
                         K.session_terminate()
@@ -290,8 +283,8 @@ class KSEFCLI(LOGGER, KSEF_ZAKUPOWE_HELPER):
         ok: bool = True
         mess = "Skonfigurowane"
         try:
-            token: TOKEN = odczytaj_tokny(self.C, nip.nip)
-            if token.p12 is not None:
+            cred: Credentials = load_credentials(self.C, nip.nip)
+            if cred.is_cert():
                 auth = "certyfikat"
         except Exception as e:
             errmess = f"Połączenie z KSeF 2.0 nie jest skonfigurawane dla {nip.nip}"
@@ -302,7 +295,7 @@ class KSEFCLI(LOGGER, KSEF_ZAKUPOWE_HELPER):
         res = {
             "auth": auth,
             "mess": mess,
-            "env": token.env_s if ok else None,
+            "env": cred.env_s if ok else None,
             "files": {
                 "ksef_conf": self.C.ksef_conf_path,
                 "work_dir": self.C.work_nip_dir(nip),
@@ -349,3 +342,41 @@ class KSEFCLI(LOGGER, KSEF_ZAKUPOWE_HELPER):
     def wez_bufor_faktura(self, _: KSEFSDK, ksef_number: str) -> tuple[dict, str]:
         faktura_path = self.daj_faktura_zakupowa_path(self, ksef_number)
         return {"faktura_path": faktura_path}, f"Faktura {ksef_number} z bufora zakupowego"
+
+    def dodaj_token(self, output: str, env: str, token: str) -> tuple[bool, str]:
+        EV = self.genE(E.DODAJ_TOKEN, output=output)
+        nip = self.nip.nip
+        try:
+            add_token_credentials(self.C, nip, env_s=env, token=token)
+        except Exception as e:
+            errmess = f"Nie można dodać tokena dla NIP {nip}: {e}"
+            self.logger.exception(e)
+            EV.koniec(res=False, errmess=errmess)
+            return False, errmess
+        mess = f"Dodano token dla NIP {nip} (env={env})"
+        self.logger.info(mess)
+        EV.koniec(res=True, errmess=mess, res_dict={"auth": "token", "env": env})
+        return True, mess
+
+    def dodaj_certyfikat(
+        self, output: str, env: str, p12_path: str, password: str
+    ) -> tuple[bool, str]:
+        EV = self.genE(E.DODAJ_CERTYFIKAT, output=output)
+        nip = self.nip.nip
+        try:
+            add_cert_credentials(
+                self.C, nip, env_s=env, p12_path=p12_path, password=password
+            )
+        except Exception as e:
+            errmess = f"Nie można dodać certyfikatu dla NIP {nip}: {e}"
+            self.logger.exception(e)
+            EV.koniec(res=False, errmess=errmess)
+            return False, errmess
+        mess = f"Dodano certyfikat dla NIP {nip} (env={env})"
+        self.logger.info(mess)
+        EV.koniec(
+            res=True,
+            errmess=mess,
+            res_dict={"auth": "certyfikat", "env": env, "p12": p12_path},
+        )
+        return True, mess

@@ -1,9 +1,8 @@
 from dataclasses import dataclass
 import pytest
 
-from ksef_cli import KSEFCLI
+from ksef_cli import KSEFCLI, load_credentials
 from ksef_cli.ksef_conf import CONF
-from ksef_cli.ksef_tokens import odczytaj_tokny
 
 import helper as T
 from ksef_test_base import (
@@ -67,21 +66,22 @@ class TestKSEFCombined(AbstractTestKSEFCLI):
         if not cfg.is_token:
             pytest.skip("token-only")
         with pytest.raises(KeyError):
-            odczytaj_tokny(self.C, "1234567890")
+            load_credentials(self.C, "1234567890")
 
     def test_token_nip_wrong_env(self, cfg):
         if not cfg.is_token:
             pytest.skip("token-only")
         with pytest.raises(ValueError):
-            odczytaj_tokny(self.C, "9999999997")
+            load_credentials(self.C, "9999999997")
 
     def test_token_nip_end_env(self, cfg):
         if not cfg.is_token:
             pytest.skip("token-only")
-        token = odczytaj_tokny(self.C, "888888887")
-        print(token)
-        assert token.env == 0
-        assert token.token == "xxxxxxxxxxxx"
+        cred = load_credentials(self.C, "888888887")
+        print(cred)
+        assert cred.env == 0
+        assert not cred.is_cert()
+        assert cred.get_token() == "xxxxxxxxxxxx"
 
     def test_usun_katalog_roboczy(self, cfg):
         if not cfg.is_token:
