@@ -98,7 +98,8 @@ Ten sam symbol NIP może być wywoływany z różnymi podkatalogami. Przykład:
   * ksef_cli.py Dostępna funkcjonalność
   * ksef_conf.py Wykorzystywany wewnętrznie, konfiguracja
   * ksef_log.py Wykorzystywany wewnętrznie, tworzenie dziennika
-  * ksef_tokens.py Wykorzystywany wewnętrznie, tokeny i środowiska
+  * credentials.py Wykorzystywany wewnętrznie, system pluginów autentykacji (CredentialsProvider)
+  * credentials_yaml.py Domyślny provider, odczyt/zapis konfiguracji z pliku YAML
 * tests  Unit test suite
 
 ## Struktura katalogu z logami i dziennikiem
@@ -155,6 +156,8 @@ akcja, dopuszczalne wartości:
 * pobierz_zakupowe Odczytaj nagłówki (metadata) faktur zakupowych
 * odczytaj_fakture Odczytaj fakturę na podstawie nadanego numeru KSeF
 * wyslij_wsadowo Wysyła paczkę faktur w sesji wsadowej
+* dodaj_token Dodaj nowy NIP z autentykacją tokenem do pliku konfiguracyjnego
+* dodaj_certyfikat Dodaj nowy NIP z autentykacją certyfikatem do pliku konfiguracyjnego
 
 nip:
 * Numer NIP użytkownika KSeF 2.0. Numer NIP musi być zawarty w pliku *KSEFCONF*. Z pliku konfiguracyjnego jest odczytywany odpowiedni token służący do autentykacji.
@@ -330,7 +333,35 @@ Zwraca w plik_na_wynik
   * OK: true/false
   * errmess
   * faktura_path Ścieżka dostępu do pliku XML z zawartością faktury zakupowej KSeF w buforze.
-  
+
+## dodaj_token
+
+Dodaje nowy NIP z autentykacją tokenem do pliku konfiguracyjnego wskazywanego przez zmienną *KSEFCONF*. Jeśli wpis dla podanego NIP już istnieje, zostaje nadpisany. Wartość *env* jest walidowana przed zapisem (dopuszczalne: prod, demo, test, unittest).
+
+> python -m ksef_cli dodaj_token  \<nip\> <plik_na_wynik> \<env\> \<token\>
+
+Zwraca w plik_na_wynik
+  * OK: true/false
+  * errmess
+  * auth: "token"
+  * env: zapisane środowisko
+
+## dodaj_certyfikat
+
+Dodaje nowy NIP z autentykacją certyfikatem do pliku konfiguracyjnego wskazywanego przez zmienną *KSEFCONF*. Jeśli wpis dla podanego NIP już istnieje, zostaje nadpisany. Wartość *env* jest walidowana przed zapisem (dopuszczalne: prod, demo, test, unittest).
+
+> python -m ksef_cli dodaj_certyfikat  \<nip\> <plik_na_wynik> \<env\> <p12_path> \<password\>
+
+* p12_path Ścieżka do pliku .p12 z certyfikatem
+* password Hasło do pliku .p12
+
+Zwraca w plik_na_wynik
+  * OK: true/false
+  * errmess
+  * auth: "certyfikat"
+  * env: zapisane środowisko
+  * p12: ścieżka do certyfikatu
+
 
 ## Przykładowe wywołanie
 > export KSEFCONF=/ścieżka/ <br>

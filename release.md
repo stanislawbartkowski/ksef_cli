@@ -1,3 +1,9 @@
+## Wersja 1.2.0 Data: 2026/05/25
+* Refactoring autentykacji: zastąpienie ksef_tokens.py pluggable systemem CredentialsProvider (credentials.py + credentials_yaml.py)
+* Dodanie akcji dodaj_token oraz dodaj_certyfikat — rejestracja nowego NIP w pliku konfiguracyjnym z linii poleceń
+* Cicha nadpisywanie istniejących wpisów, walidacja środowiska przed zapisem
+* Dodanie modułu testowego tests/test3.py pokrywającego nowe API (12 testów, bez wymogu połączenia z KSeF)
+
 ## Wersja 1.1.6r1 Data: 2026/05/18
 * Dodanie testu z zamianą linii dla KSeF
 
