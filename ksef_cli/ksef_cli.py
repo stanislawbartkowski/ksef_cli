@@ -21,7 +21,9 @@ from .credentials import (
     add_cert_credentials,
     add_token_credentials,
     load_credentials,
+    resolve_env,
 )
+from .readp12 import read_cert
 
 
 def _tomorrow() -> str:
@@ -342,6 +344,58 @@ class KSEFCLI(LOGGER, KSEF_ZAKUPOWE_HELPER):
     def wez_bufor_faktura(self, _: KSEFSDK, ksef_number: str) -> tuple[dict, str]:
         faktura_path = self.daj_faktura_zakupowa_path(self, ksef_number)
         return {"faktura_path": faktura_path}, f"Faktura {ksef_number} z bufora zakupowego"
+
+    @ksef_action(action=E.POBIERZ_TOKENY)
+    def pobierz_tokeny(self, K: KSEFSDK) -> tuple[dict, str]:
+        tokens = K.get_list_of_tokens()
+        return {"tokens": tokens}, f"Liczba tokenów: {len(tokens)}"
+
+    def sprawdz_token(self, output: str, env: str, token: str) -> tuple[bool, str]:
+        EV = self.genE(E.SPRAWDZ_TOKEN, output=output)
+        nip = self.nip.nip
+        try:
+            env_int = resolve_env(env)
+            K = KSEFSDK.initsdk(env=env_int, nip=nip, token=token)
+            K.get_list_of_tokens()
+            K.session_terminate()
+        except Exception as e:
+            errmess = f"Token niepoprawny dla NIP {nip} (env={env}): {e}"
+            self.logger.exception(e)
+            EV.koniec(res=False, errmess=errmess, res_dict={"valid": False, "env": env})
+            return False, errmess
+        mess = f"Token poprawny dla NIP {nip} (env={env})"
+        self.logger.info(mess)
+        EV.koniec(res=True, errmess=mess, res_dict={"valid": True, "env": env})
+        return True, mess
+
+    def sprawdz_certyfikat(
+        self, output: str, env: str, p12_path: str, password: str
+    ) -> tuple[bool, str]:
+        EV = self.genE(E.SPRAWDZ_CERTYFIKAT, output=output)
+        nip = self.nip.nip
+        try:
+            env_int = resolve_env(env)
+            key, cert = read_cert(file_path=p12_path, password=password)
+            K = KSEFSDK.initsdkcert(env=env_int, nip=nip, p12pk=key, p12pc=cert)
+            K.get_list_of_tokens()
+            K.session_terminate()
+        except Exception as e:
+            errmess = f"Certyfikat niepoprawny dla NIP {nip} (env={env}): {e}"
+            self.logger.exception(e)
+            EV.koniec(
+                res=False,
+                errmess=errmess,
+                res_dict={"valid": False, "env": env, "p12": p12_path},
+            )
+            return False, errmess
+        mess = f"Certyfikat poprawny dla NIP {nip} (env={env})"
+        self.logger.info(mess)
+        EV.koniec(
+            res=True,
+            errmess=mess,
+            res_dict={"valid": True, "env": env, "p12": p12_path},
+        )
+        return True, mess
 
     def dodaj_token(self, output: str, env: str, token: str) -> tuple[bool, str]:
         EV = self.genE(E.DODAJ_TOKEN, output=output)

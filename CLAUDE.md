@@ -56,7 +56,9 @@ The decorator wrapping most public methods in `KSEFCLI` handles the full operati
 
 Adding a new action means: write a method decorated with `@ksef_action`, register it in `main.py`'s `_actions` dict.
 
-Some actions (e.g. `daj_konfiguracje`, `dodaj_token`, `dodaj_certyfikat`) do not need a KSeF session and skip the decorator — they call `self.genE(...)` directly and write their result via `E.zapisz_res(...)` / `EV.koniec(...)`.
+Some actions skip the decorator entirely and call `self.genE(...)` directly, writing their result via `E.zapisz_res(...)` / `EV.koniec(...)`. Two sub-categories:
+- **No KSeF session at all** (`daj_konfiguracje`, `dodaj_token`, `dodaj_certyfikat`) — pure local-file operations.
+- **Session with ad-hoc credentials** (`sprawdz_token`, `sprawdz_certyfikat`) — credentials come from CLI args rather than `load_credentials`, so the standard decorator flow doesn't apply. They construct the SDK manually via `KSEFSDK.initsdk(...)` / `initsdkcert(...)` and exercise auth with a lightweight call (`get_list_of_tokens`).
 
 ### Configuration (`ksef_conf.py`)
 
@@ -93,7 +95,9 @@ tokens:
 
 Environments map to KSeF endpoints: `prod` → production, `demo` → PREKSEF, `test` → DEVKSEF, `unittest` → UNITTEST.
 
-The `dodaj_token` and `dodaj_certyfikat` CLI actions upsert entries into the YAML config (silent overwrite if `NIP{nip}` already exists). `env_s` is validated via `resolve_env(...)` before write.
+The `dodaj_token` and `dodaj_certyfikat` CLI actions upsert entries into the YAML config (silent overwrite if `NIP{nip}` already exists). `env_s` is validated via `resolve_env(...)` before write. The `sprawdz_token` / `sprawdz_certyfikat` actions are read-only validators — they verify that supplied credentials can actually authenticate against KSeF without touching the YAML, intended as a "dry run" before `dodaj_*`.
+
+The `pobierz_tokeny` action wraps `KSEFSDK.get_list_of_tokens()` to return the list of session tokens KSeF has on file for the configured NIP — uses the standard `@ksef_action` flow (loaded credentials, real session).
 
 ### Logging (`ksef_log.py`)
 

@@ -173,3 +173,30 @@ class TestKSEFCombined(AbstractTestKSEFCLI):
 
     def test_wyslij_z_wierszami(self, cfg):
         self._test_wyslij_z_wierszami(self.A)
+
+    def test_daj_tokeny(self):
+        self._test_daj_tokeny(self.A)
+
+    def test_daj_tokeny_brak_nip(self):
+        self._test_daj_tokeny_brak_nip(self.A)
+
+    def test_sprawdz_token_poprawny(self):
+        self._test_sprawdz_token_poprawny(self.A)
+
+    def test_sprawdz_token_niepoprawny(self):
+        self._test_sprawdz_token_niepoprawny(self.A)
+
+    def test_sprawdz_token_bledny_env(self):
+        self._test_sprawdz_token_bledny_env(self.A)
+
+    def test_sprawdz_certyfikat_poprawny(self):
+        self._test_sprawdz_certyfikat_poprawny(self.A)
+
+    def test_sprawdz_certyfikat_zle_haslo(self):
+        self._test_sprawdz_certyfikat_zle_haslo(self.A)
+
+    def test_sprawdz_certyfikat_brak_pliku(self):
+        self._test_sprawdz_certyfikat_brak_pliku(self.A)
+
+    def test_sprawdz_certyfikat_bledny_env(self):
+        self._test_sprawdz_certyfikat_bledny_env(self.A)

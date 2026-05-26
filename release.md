@@ -2,7 +2,11 @@
 * Refactoring autentykacji: zastąpienie ksef_tokens.py pluggable systemem CredentialsProvider (credentials.py + credentials_yaml.py)
 * Dodanie akcji dodaj_token oraz dodaj_certyfikat — rejestracja nowego NIP w pliku konfiguracyjnym z linii poleceń
 * Cicha nadpisywanie istniejących wpisów, walidacja środowiska przed zapisem
-* Dodanie modułu testowego tests/test3.py pokrywającego nowe API (12 testów, bez wymogu połączenia z KSeF)
+* Dodanie akcji pobierz_tokeny — pobranie listy tokenów zarejestrowanych w KSeF dla danego NIP (wrapper na KSEFSDK.get_list_of_tokens)
+* Dodanie akcji sprawdz_token — walidacja tokena bez zapisu do konfiguracji (próba autoryzacji w KSeF z parametrów wywołania)
+* Dodanie akcji sprawdz_certyfikat — walidacja certyfikatu bez zapisu do konfiguracji (próba autoryzacji w KSeF z parametrów wywołania)
+* Dodanie modułu testowego tests/test3.py pokrywającego nowe API offline (12 testów, bez wymogu połączenia z KSeF)
+* Rozszerzenie tests/test1.py o testy dla nowych akcji w trzech wariantach adapterów (token, cert, main)
 
 ## Wersja 1.1.6r1 Data: 2026/05/18
 * Dodanie testu z zamianą linii dla KSeF

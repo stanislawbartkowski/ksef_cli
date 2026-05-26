@@ -17,6 +17,9 @@ UAKTUALNIJ_BUFOR_ZAKUPOWE = "uaktualnij_zakupowe_bufor"
 WEZ_FAKTURA_BUFOR = "wez_faktura_bufor"
 DODAJ_TOKEN = "dodaj_token"
 DODAJ_CERTYFIKAT = "dodaj_certyfikat"
+POBIERZ_TOKENY = "pobierz_tokeny"
+SPRAWDZ_TOKEN = "sprawdz_token"
+SPRAWDZ_CERTYFIKAT = "sprawdz_certyfikat"
 
 HELP = "help"
 
@@ -34,7 +37,10 @@ _actions = {
     UAKTUALNIJ_BUFOR_ZAKUPOWE: (2, KSEFCLI.uaktualnij_bufor_zakupowe, ()),
     WEZ_FAKTURA_BUFOR: (3, KSEFCLI.wez_bufor_faktura, ('ksef_number',)),
     DODAJ_TOKEN: (4, KSEFCLI.dodaj_token, ('env', 'token')),
-    DODAJ_CERTYFIKAT: (5, KSEFCLI.dodaj_certyfikat, ('env', 'p12_path', 'password'))
+    DODAJ_CERTYFIKAT: (5, KSEFCLI.dodaj_certyfikat, ('env', 'p12_path', 'password')),
+    POBIERZ_TOKENY: (2, KSEFCLI.pobierz_tokeny, ()),
+    SPRAWDZ_TOKEN: (4, KSEFCLI.sprawdz_token, ('env', 'token')),
+    SPRAWDZ_CERTYFIKAT: (5, KSEFCLI.sprawdz_certyfikat, ('env', 'p12_path', 'password'))
 }
 
 

@@ -2,7 +2,7 @@ import json
 import os
 import xml.etree.ElementTree as et
 
-from ksef_cli import KSEFCLI
+from ksef_cli import KSEFCLI, load_credentials
 from ksef_cli.ksef_conf import CONF, NIP
 from ksef_cli.main import run_main
 
@@ -68,6 +68,20 @@ class AKsefCli:
     def wez_faktura_bufor(C: CONF, output: str, nip: str, ksef_number: str) -> tuple[bool, str]:
         raise NotImplementedError
 
+    @staticmethod
+    def daj_tokeny(C: CONF, output: str, nip: str) -> tuple[bool, str]:
+        raise NotImplementedError
+
+    @staticmethod
+    def sprawdz_token(C: CONF, output: str, nip: str, env: str, token: str) -> tuple[bool, str]:
+        raise NotImplementedError
+
+    @staticmethod
+    def sprawdz_certyfikat(
+        C: CONF, output: str, nip: str, env: str, p12_path: str, password: str
+    ) -> tuple[bool, str]:
+        raise NotImplementedError
+
 
 class TestKsefCli(AKsefCli):
     @staticmethod
@@ -106,6 +120,25 @@ class TestKsefCli(AKsefCli):
     def daj_konfiguracje(C: CONF, output: str, nip: str) -> tuple[bool, str]:
         cli = KSEFCLI(C, nip)
         return cli.daj_konfiguracje(output=output)
+
+    @staticmethod
+    def daj_tokeny(C: CONF, output: str, nip: str) -> tuple[bool, str]:
+        cli = KSEFCLI(C, nip)
+        return cli.pobierz_tokeny(output=output)
+
+    @staticmethod
+    def sprawdz_token(C: CONF, output: str, nip: str, env: str, token: str) -> tuple[bool, str]:
+        cli = KSEFCLI(C, nip)
+        return cli.sprawdz_token(output=output, env=env, token=token)
+
+    @staticmethod
+    def sprawdz_certyfikat(
+        C: CONF, output: str, nip: str, env: str, p12_path: str, password: str
+    ) -> tuple[bool, str]:
+        cli = KSEFCLI(C, nip)
+        return cli.sprawdz_certyfikat(
+            output=output, env=env, p12_path=p12_path, password=password
+        )
 
 
 def _wynik_wsadowo(output, ok, errmsg) -> tuple[bool, str]:
@@ -200,6 +233,23 @@ class TestKsefCliMain(AKsefCli):
     @staticmethod
     def wez_faktura_bufor(C: CONF, output: str, nip: str, ksef_number: str) -> tuple[bool, str]:
         argv = ["", "wez_faktura_bufor", nip, output, ksef_number]
+        return _run_main_res(argv, output)
+
+    @staticmethod
+    def daj_tokeny(C: CONF, output: str, nip: str) -> tuple[bool, str]:
+        argv = ["", "pobierz_tokeny", nip, output]
+        return _run_main_res(argv, output)
+
+    @staticmethod
+    def sprawdz_token(C: CONF, output: str, nip: str, env: str, token: str) -> tuple[bool, str]:
+        argv = ["", "sprawdz_token", nip, output, env, token]
+        return _run_main_res(argv, output)
+
+    @staticmethod
+    def sprawdz_certyfikat(
+        C: CONF, output: str, nip: str, env: str, p12_path: str, password: str
+    ) -> tuple[bool, str]:
+        argv = ["", "sprawdz_certyfikat", nip, output, env, p12_path, password]
         return _run_main_res(argv, output)
 
 
@@ -567,6 +617,122 @@ class AbstractTestKSEFCLI:
         print(d)
         assert not d["OK"]
         assert "Duplikat faktury" in d["errmess"]
+
+    def _test_daj_tokeny(self, A: AKsefCli, nip: str = T.NIP):
+        output = T.temp_ojosn()
+        res = A.daj_tokeny(C=self.C, output=output, nip=nip)
+        print(res)
+        assert res[0]
+        d = _wez_res(output)
+        print(d)
+        assert d["OK"]
+        assert "tokens" in d
+        assert isinstance(d["tokens"], list)
+
+    def _test_daj_tokeny_brak_nip(self, A: AKsefCli):
+        nip = "xxxxxxxxxxxx"
+        output = T.temp_ojosn()
+        res = A.daj_tokeny(C=self.C, output=output, nip=nip)
+        print(res)
+        assert not res[0]
+        assert "Nie można odczytać tokena KSeF dla NIP" in res[1]
+
+    def _test_sprawdz_token_poprawny(self, A: AKsefCli):
+        cred = load_credentials(T.CO(), T.NIP)
+        valid_token = cred.get_token()
+        output = T.temp_ojosn()
+        res = A.sprawdz_token(
+            C=self.C, output=output, nip=T.NIP, env=cred.env_s, token=valid_token
+        )
+        print(res)
+        assert res[0]
+        d = _wez_res(output)
+        print(d)
+        assert d["OK"]
+        assert d["valid"] is True
+        assert d["env"] == cred.env_s
+
+    def _test_sprawdz_token_niepoprawny(self, A: AKsefCli):
+        output = T.temp_ojosn()
+        res = A.sprawdz_token(
+            C=self.C, output=output, nip=T.NIP, env="test", token="zly-token-12345"
+        )
+        print(res)
+        assert not res[0]
+        d = _wez_res(output)
+        print(d)
+        assert not d["OK"]
+        assert d["valid"] is False
+
+    def _test_sprawdz_token_bledny_env(self, A: AKsefCli):
+        output = T.temp_ojosn()
+        res = A.sprawdz_token(
+            C=self.C, output=output, nip=T.NIP, env="bogus", token="anything"
+        )
+        print(res)
+        assert not res[0]
+        d = _wez_res(output)
+        print(d)
+        assert not d["OK"]
+        assert "Nierozpoznane" in d["errmess"] or "bogus" in d["errmess"]
+
+    @staticmethod
+    def _cert_test_p12_path() -> str:
+        return os.path.join(os.path.dirname(T.CO_CERT().ksef_conf_path), "keyStore.p12")
+
+    def _test_sprawdz_certyfikat_poprawny(self, A: AKsefCli):
+        p12_path = self._cert_test_p12_path()
+        output = T.temp_ojosn()
+        res = A.sprawdz_certyfikat(
+            C=self.C, output=output, nip=T.NIP, env="test",
+            p12_path=p12_path, password="1234",
+        )
+        print(res)
+        assert res[0]
+        d = _wez_res(output)
+        print(d)
+        assert d["OK"]
+        assert d["valid"] is True
+        assert d["p12"] == p12_path
+
+    def _test_sprawdz_certyfikat_zle_haslo(self, A: AKsefCli):
+        p12_path = self._cert_test_p12_path()
+        output = T.temp_ojosn()
+        res = A.sprawdz_certyfikat(
+            C=self.C, output=output, nip=T.NIP, env="test",
+            p12_path=p12_path, password="zle-haslo",
+        )
+        print(res)
+        assert not res[0]
+        d = _wez_res(output)
+        print(d)
+        assert not d["OK"]
+        assert d["valid"] is False
+
+    def _test_sprawdz_certyfikat_brak_pliku(self, A: AKsefCli):
+        output = T.temp_ojosn()
+        res = A.sprawdz_certyfikat(
+            C=self.C, output=output, nip=T.NIP, env="test",
+            p12_path="/tmp/nie-istnieje-na-pewno.p12", password="1234",
+        )
+        print(res)
+        assert not res[0]
+        d = _wez_res(output)
+        print(d)
+        assert not d["OK"]
+
+    def _test_sprawdz_certyfikat_bledny_env(self, A: AKsefCli):
+        output = T.temp_ojosn()
+        res = A.sprawdz_certyfikat(
+            C=self.C, output=output, nip=T.NIP, env="bogus",
+            p12_path="/tmp/x.p12", password="x",
+        )
+        print(res)
+        assert not res[0]
+        d = _wez_res(output)
+        print(d)
+        assert not d["OK"]
+        assert "Nierozpoznane" in d["errmess"] or "bogus" in d["errmess"]
 
     def _test_wyslij_z_wierszami(self, A: AKsefCli):
         przyklad = "FA_3_Przykład_9_pattern_linie.xml"
