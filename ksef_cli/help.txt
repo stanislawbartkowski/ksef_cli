@@ -1,7 +1,7 @@
 Wywołanie:
   python -m ksef_cli <akcja> <nip> <plik_na_wynik> <dodatkowe_parametry>
 
-Wersja 1.1.6r1 z dnia 18 maja 2026 roku.
+Wersja 1.2.0 z dnia 25 maja 2026 roku.
 
 Akcje:
   wyslij_fakture Wysłanie faktury do system KSeF 2.0
@@ -15,6 +15,11 @@ Akcje:
   daj_zakupowe_bufor Odczytaj faktury zakupowe z bufora zakupowych
   uaktualnij_zakupowe_bufor Ukatualnij bufor faktur zakupowych
   wez_faktura_bufor Podaj ścieżkę do faktury zakupowej
+  dodaj_token Dodaj nowy NIP z autentykacją tokenem do pliku konfiguracyjnego
+  dodaj_certyfikat Dodaj nowy NIP z autentykacją certyfikatem do pliku konfiguracyjnego
+  pobierz_tokeny Pobierz listę tokenów zarejestrowanych w KSeF dla danego NIP
+  sprawdz_token Sprawdź poprawność tokena (próba połączenia z KSeF bez zapisu do konfiguracji)
+  sprawdz_certyfikat Sprawdź poprawność certyfikatu (próba połączenia z KSeF bez zapisu do konfiguracji)
 
 Nip:
   Numer NIP użytkownika KSeF 2.0. NIP musi mieć odpowiednik z pliku konfiguracyjnym
@@ -119,4 +124,78 @@ wez_faktura_bufor
     errmess
     faktura_path: pełna ścieżka do pliku XML z treścią faktury KSeF
 
-  
+dodaj_token
+  python -m ksef_cli dodaj_token  <nip> <plik_na_wynik> <env> <token>
+
+  env: środowisko KSeF (prod, demo, test, unittest)
+  token: token autoryzacyjny KSeF 2.0
+
+  Wpis dla podanego NIP zostaje dopisany do pliku konfiguracyjnego (KSEFCONF).
+  Jeśli wpis już istnieje, zostaje nadpisany.
+
+  Zwraca w plik_na_wynik
+    OK: true/false
+    errmess
+    auth: "token"
+    env: zapisane środowisko
+
+dodaj_certyfikat
+  python -m ksef_cli dodaj_certyfikat  <nip> <plik_na_wynik> <env> <p12_path> <password>
+
+  env: środowisko KSeF (prod, demo, test, unittest)
+  p12_path: ścieżka do pliku .p12 z certyfikatem
+  password: hasło do pliku .p12
+
+  Wpis dla podanego NIP zostaje dopisany do pliku konfiguracyjnego (KSEFCONF).
+  Jeśli wpis już istnieje, zostaje nadpisany.
+
+  Zwraca w plik_na_wynik
+    OK: true/false
+    errmess
+    auth: "certyfikat"
+    env: zapisane środowisko
+    p12: ścieżka do certyfikatu
+
+pobierz_tokeny
+  python -m ksef_cli pobierz_tokeny  <nip> <plik_na_wynik>
+
+  Odczytuje listę tokenów zarejestrowanych w KSeF 2.0 dla danego NIP.
+  Akcja wymaga aktywnej sesji w KSeF (token lub certyfikat skonfigurowany w KSEFCONF).
+
+  Zwraca w plik_na_wynik
+    OK: true/false
+    errmess
+    tokens: lista tokenów zarejestrowanych w KSeF dla NIP
+
+sprawdz_token
+  python -m ksef_cli sprawdz_token  <nip> <plik_na_wynik> <env> <token>
+
+  env: środowisko KSeF (prod, demo, test, unittest)
+  token: token do sprawdzenia
+
+  Sprawdza, czy podany token pozwala na połączenie z KSeF 2.0 dla danego NIP.
+  Nie modyfikuje pliku konfiguracyjnego (KSEFCONF).
+
+  Zwraca w plik_na_wynik
+    OK: true/false (true jeśli token jest poprawny)
+    errmess: komunikat błędu, jeśli token jest niepoprawny
+    valid: true/false (kopia OK, ułatwia parsowanie)
+    env: sprawdzane środowisko
+
+sprawdz_certyfikat
+  python -m ksef_cli sprawdz_certyfikat  <nip> <plik_na_wynik> <env> <p12_path> <password>
+
+  env: środowisko KSeF (prod, demo, test, unittest)
+  p12_path: ścieżka do pliku .p12 z certyfikatem
+  password: hasło do pliku .p12
+
+  Sprawdza, czy podany certyfikat pozwala na połączenie z KSeF 2.0 dla danego NIP.
+  Nie modyfikuje pliku konfiguracyjnego (KSEFCONF).
+
+  Zwraca w plik_na_wynik
+    OK: true/false (true jeśli certyfikat jest poprawny)
+    errmess: komunikat błędu, jeśli certyfikat jest niepoprawny
+    valid: true/false (kopia OK, ułatwia parsowanie)
+    env: sprawdzane środowisko
+    p12: ścieżka do certyfikatu
+

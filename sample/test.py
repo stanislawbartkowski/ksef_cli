@@ -1,8 +1,7 @@
 import logging
 
-from ksef_cli.ksef_tokens import odczytaj_tokny
+from ksef_cli import KSEFCLI, load_credentials
 from ksef_cli.ksef_conf import CONF
-from ksef_cli import KSEFCLI
 
 import tests.helper as T
 
@@ -19,7 +18,7 @@ def test1():
 
 def test2():
     C = T.CO()
-    odczytaj_tokny(C, "1234567890")
+    load_credentials(C, "1234567890")
 
 
 def test3():
@@ -78,7 +77,7 @@ def test7():
 
 def test8():
     C = T.CO_CERT()
-    odczytaj_tokny(C, "1234567")
+    load_credentials(C, "1234567")
 
 
 def test9():

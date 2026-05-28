@@ -46,15 +46,19 @@ Every action writes a JSON file to `output_file` with at minimum `{"OK": true}` 
 
 ### `@ksef_action` Decorator (`ksef_cli.py`)
 
-The decorator wrapping every public method in `KSEFCLI` handles the full operation lifecycle:
-1. Reads config via `CONF` and tokens via `get_token()`
+The decorator wrapping most public methods in `KSEFCLI` handles the full operation lifecycle:
+1. Reads config via `CONF` and credentials via `load_credentials()` (returns a `Credentials` object exposing `.get_token()` or `.get_cert()`)
 2. Opens a KSeF session (KSEFSDK) unless `enable_session=False`
 3. Calls the wrapped method
 4. Catches `requests.HTTPError` and generic exceptions, writing error JSON
 5. Logs a `E` event record to CSV
 6. Terminates the session
 
-Adding a new action means: write a method decorated with `@ksef_action`, register it in `main.py`'s `ACTIONS` dict.
+Adding a new action means: write a method decorated with `@ksef_action`, register it in `main.py`'s `_actions` dict.
+
+Some actions skip the decorator entirely and call `self.genE(...)` directly, writing their result via `E.zapisz_res(...)` / `EV.koniec(...)`. Two sub-categories:
+- **No KSeF session at all** (`daj_konfiguracje`, `dodaj_token`, `dodaj_certyfikat`) — pure local-file operations.
+- **Session with ad-hoc credentials** (`sprawdz_token`, `sprawdz_certyfikat`) — credentials come from CLI args rather than `load_credentials`, so the standard decorator flow doesn't apply. They construct the SDK manually via `KSEFSDK.initsdk(...)` / `initsdkcert(...)` and exercise auth with a lightweight call (`get_list_of_tokens`).
 
 ### Configuration (`ksef_conf.py`)
 
@@ -62,9 +66,15 @@ Adding a new action means: write a method decorated with `@ksef_action`, registe
 - `NIP` class parses `NIP$SUBDIR` syntax — e.g. `7497725064$ROK2025` splits into nip and subdirectory used under `KSEFDIR/`.
 - Directory layout: `KSEFDIR/{NIP}/{KSEF_NUMBER}/` for invoices, `KSEFDIR-zakupowe/{NIP}/` for purchase invoice buffer.
 
-### Authentication (`ksef_tokens.py`)
+### Authentication (`credentials.py` + `credentials_yaml.py`)
 
-Reads the YAML config at `KSEFCONF`. Two supported schemes:
+Pluggable provider system. `credentials.py` defines:
+- `Credentials` (abstract) + `TokenCredentials` / `CertCredentials` concrete subclasses.
+- `CredentialsProvider` (abstract) with `get_credentials(conf, nip)` and optional `add_token` / `add_cert` (default raise `NotImplementedError`).
+- Module-level helpers: `load_credentials(...)`, `add_token_credentials(...)`, `add_cert_credentials(...)`.
+- Provider registry: `register_provider`, `get_provider`, `set_default_provider`. Default is `yaml`. Override via `KSEF_CREDENTIALS_PROVIDER` env var or `importlib.metadata` entry points in the `ksef_cli.credentials_providers` group.
+
+`credentials_yaml.py` implements the default `yaml` provider against the file at `KSEFCONF`. Two supported schemes:
 
 **Token-based:**
 ```yaml
@@ -84,6 +94,10 @@ tokens:
 ```
 
 Environments map to KSeF endpoints: `prod` → production, `demo` → PREKSEF, `test` → DEVKSEF, `unittest` → UNITTEST.
+
+The `dodaj_token` and `dodaj_certyfikat` CLI actions upsert entries into the YAML config (silent overwrite if `NIP{nip}` already exists). `env_s` is validated via `resolve_env(...)` before write. The `sprawdz_token` / `sprawdz_certyfikat` actions are read-only validators — they verify that supplied credentials can actually authenticate against KSeF without touching the YAML, intended as a "dry run" before `dodaj_*`.
+
+The `pobierz_tokeny` action wraps `KSEFSDK.get_list_of_tokens()` to return the list of session tokens KSeF has on file for the configured NIP — uses the standard `@ksef_action` flow (loaded credentials, real session).
 
 ### Logging (`ksef_log.py`)
 
@@ -112,3 +126,5 @@ Tests use **pytest** and require a live KSeF test environment. Test configs live
 - `TestKSEFCliCertNIPDIR` — cert auth with `NIP$SUBDIR` path patterns.
 - `TestKSEFWsadowe` / `TestKSEFWsadowoMain` — batch submission via SDK and CLI.
 - `TestKSEFWsadowoDuzoFaktur` — bulk invoice submission (up to 10 invoices).
+
+**`test3.py`** — credential write-path tests for `add_token_credentials` / `add_cert_credentials` and the `dodaj_token` / `dodaj_certyfikat` CLI actions. Uses `tmp_path` + `monkeypatch` fixtures — no live KSeF session, no shared state with `tests/conf/`.

@@ -98,7 +98,8 @@ Ten sam symbol NIP może być wywoływany z różnymi podkatalogami. Przykład:
   * ksef_cli.py Dostępna funkcjonalność
   * ksef_conf.py Wykorzystywany wewnętrznie, konfiguracja
   * ksef_log.py Wykorzystywany wewnętrznie, tworzenie dziennika
-  * ksef_tokens.py Wykorzystywany wewnętrznie, tokeny i środowiska
+  * credentials.py Wykorzystywany wewnętrznie, system pluginów autentykacji (CredentialsProvider)
+  * credentials_yaml.py Domyślny provider, odczyt/zapis konfiguracji z pliku YAML
 * tests  Unit test suite
 
 ## Struktura katalogu z logami i dziennikiem
@@ -155,6 +156,11 @@ akcja, dopuszczalne wartości:
 * pobierz_zakupowe Odczytaj nagłówki (metadata) faktur zakupowych
 * odczytaj_fakture Odczytaj fakturę na podstawie nadanego numeru KSeF
 * wyslij_wsadowo Wysyła paczkę faktur w sesji wsadowej
+* dodaj_token Dodaj nowy NIP z autentykacją tokenem do pliku konfiguracyjnego
+* dodaj_certyfikat Dodaj nowy NIP z autentykacją certyfikatem do pliku konfiguracyjnego
+* pobierz_tokeny Pobierz listę tokenów zarejestrowanych w KSeF dla danego NIP
+* sprawdz_token Sprawdź poprawność tokena bez zapisu do konfiguracji
+* sprawdz_certyfikat Sprawdź poprawność certyfikatu bez zapisu do konfiguracji
 
 nip:
 * Numer NIP użytkownika KSeF 2.0. Numer NIP musi być zawarty w pliku *KSEFCONF*. Z pliku konfiguracyjnego jest odczytywany odpowiedni token służący do autentykacji.
@@ -330,7 +336,78 @@ Zwraca w plik_na_wynik
   * OK: true/false
   * errmess
   * faktura_path Ścieżka dostępu do pliku XML z zawartością faktury zakupowej KSeF w buforze.
-  
+
+## dodaj_token
+
+Dodaje nowy NIP z autentykacją tokenem do pliku konfiguracyjnego wskazywanego przez zmienną *KSEFCONF*. Jeśli wpis dla podanego NIP już istnieje, zostaje nadpisany. Wartość *env* jest walidowana przed zapisem (dopuszczalne: prod, demo, test, unittest).
+
+> python -m ksef_cli dodaj_token  \<nip\> <plik_na_wynik> \<env\> \<token\>
+
+Zwraca w plik_na_wynik
+  * OK: true/false
+  * errmess
+  * auth: "token"
+  * env: zapisane środowisko
+
+## dodaj_certyfikat
+
+Dodaje nowy NIP z autentykacją certyfikatem do pliku konfiguracyjnego wskazywanego przez zmienną *KSEFCONF*. Jeśli wpis dla podanego NIP już istnieje, zostaje nadpisany. Wartość *env* jest walidowana przed zapisem (dopuszczalne: prod, demo, test, unittest).
+
+> python -m ksef_cli dodaj_certyfikat  \<nip\> <plik_na_wynik> \<env\> <p12_path> \<password\>
+
+* p12_path Ścieżka do pliku .p12 z certyfikatem
+* password Hasło do pliku .p12
+
+Zwraca w plik_na_wynik
+  * OK: true/false
+  * errmess
+  * auth: "certyfikat"
+  * env: zapisane środowisko
+  * p12: ścieżka do certyfikatu
+
+## pobierz_tokeny
+
+Pobiera z systemu KSeF 2.0 listę tokenów zarejestrowanych dla danego NIP. Wymaga aktywnej sesji KSeF (token lub certyfikat skonfigurowany w *KSEFCONF*).
+
+> python -m ksef_cli pobierz_tokeny  \<nip\> <plik_na_wynik>
+
+Zwraca w plik_na_wynik
+  * OK: true/false
+  * errmess
+  * tokens Lista tokenów zarejestrowanych w KSeF dla danego NIP
+
+## sprawdz_token
+
+Sprawdza, czy podany token pozwala na połączenie z systemem KSeF 2.0 dla danego NIP. Akcja **nie** modyfikuje pliku konfiguracyjnego — w przeciwieństwie do *dodaj_token*, token nie jest zapisywany. Można jej użyć przed *dodaj_token*, aby zweryfikować poprawność tokena przed jego zapisaniem.
+
+> python -m ksef_cli sprawdz_token  \<nip\> <plik_na_wynik> \<env\> \<token\>
+
+* env Środowisko KSeF (prod, demo, test, unittest)
+* token Token do sprawdzenia
+
+Zwraca w plik_na_wynik
+  * OK: true/false (true jeśli token jest poprawny)
+  * errmess Komunikat błędu, jeśli token jest niepoprawny
+  * valid Kopia pola OK, ułatwia parsowanie
+  * env Sprawdzane środowisko
+
+## sprawdz_certyfikat
+
+Sprawdza, czy podany certyfikat pozwala na połączenie z systemem KSeF 2.0 dla danego NIP. Akcja **nie** modyfikuje pliku konfiguracyjnego — w przeciwieństwie do *dodaj_certyfikat*, dane nie są zapisywane. Można jej użyć przed *dodaj_certyfikat*, aby zweryfikować poprawność certyfikatu i hasła przed ich zapisaniem.
+
+> python -m ksef_cli sprawdz_certyfikat  \<nip\> <plik_na_wynik> \<env\> <p12_path> \<password\>
+
+* env Środowisko KSeF (prod, demo, test, unittest)
+* p12_path Ścieżka do pliku .p12 z certyfikatem
+* password Hasło do pliku .p12
+
+Zwraca w plik_na_wynik
+  * OK: true/false (true jeśli certyfikat jest poprawny)
+  * errmess Komunikat błędu, jeśli certyfikat jest niepoprawny
+  * valid Kopia pola OK, ułatwia parsowanie
+  * env Sprawdzane środowisko
+  * p12 Ścieżka do certyfikatu
+
 
 ## Przykładowe wywołanie
 > export KSEFCONF=/ścieżka/ <br>

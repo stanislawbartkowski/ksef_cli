@@ -2,7 +2,7 @@ import pytest
 from ksef_cli.ksef_cli import KSEFCLI
 from ksef_cli.ksef_conf import CONF
 import helper as T
-from ksef_cli.ksef_tokens import odczytaj_tokny
+from ksef_cli import load_credentials
 
 
 def test_initialization_error():
@@ -13,7 +13,7 @@ def test_initialization_error():
 def test_nip_no_cert():
     C = T.CO_CERT()
     with pytest.raises(ValueError):
-        odczytaj_tokny(C, "1234567")
+        load_credentials(C, "1234567")
 
 
 def test_autentykacja_cert():

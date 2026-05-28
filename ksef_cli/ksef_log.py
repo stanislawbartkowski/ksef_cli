@@ -48,6 +48,11 @@ class E(_A):
     CZYTANIE_ZAKUPY_PRZYROSTOWO = 8
     UAKTUALNIJ_ZAKUPY_PRZYROSTOWO = 9
     WEZ_FAKTURA_BUFOR = 10
+    DODAJ_TOKEN = 11
+    DODAJ_CERTYFIKAT = 12
+    POBIERZ_TOKENY = 13
+    SPRAWDZ_TOKEN = 14
+    SPRAWDZ_CERTYFIKAT = 15
 
     _d = {
         WYCZYSC_DANE: "Wyczyść dane robocze",
@@ -60,7 +65,12 @@ class E(_A):
         CZYTANIE_FAKTUR_ZBIORCZO: "Czytanie faktur zbiorczo",
         CZYTANIE_ZAKUPY_PRZYROSTOWO: "Czytanie przyrostowe",
         UAKTUALNIJ_ZAKUPY_PRZYROSTOWO: "Uaktualnij przyrostowe",
-        WEZ_FAKTURA_BUFOR: "Faktura z bufora zakupowego"
+        WEZ_FAKTURA_BUFOR: "Faktura z bufora zakupowego",
+        DODAJ_TOKEN: "Dodaj token dla NIP",
+        DODAJ_CERTYFIKAT: "Dodaj certyfikat dla NIP",
+        POBIERZ_TOKENY: "Pobierz listę tokenów z KSeF",
+        SPRAWDZ_TOKEN: "Sprawdź poprawność tokena",
+        SPRAWDZ_CERTYFIKAT: "Sprawdź poprawność certyfikatu"
     }
 
     def __init__(self, C: CONF, nip: str, action: int, output: str | None):
